@@ -1,81 +1,88 @@
-/***************************************************
-Chương trình cảnh báo trộm
-****************************************************/
+/*
+  Rui Santos
+  Complete project details at Complete project details at https://RandomNerdTutorials.com/esp8266-nodemcu-http-get-post-arduino/
 
-// Thêm thư viện
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files.
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+*/
+
 #include <ESP8266WiFi.h>
-#include <aREST.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
 
-// Địa chỉ IP của máy tính bạn
-const char *host = "192.168.2.224";
-
-// Thông tin wifi
 const char *ssid = "WiFi";
 const char *password = "chucmungnammoi";
 
-// Trạng thái cảm biến chuyển động
-int motion_sensor_state = 0;
+//Your Domain name with URL path or IP address with path
+const char *serverName = "http://192.168.2.224:8000/update-sensor";
 
-void setup(void)
+// the following variables are unsigned longs because the time, measured in
+// milliseconds, will quickly become a bigger number than can be stored in an int.
+unsigned long lastTime = 0;
+// Timer set to 10 minutes (600000)
+//unsigned long timerDelay = 600000;
+// Set timer to 5 seconds (5000)
+unsigned long timerDelay = 5000;
+
+void setup()
 {
-  // Khởi tạo serial
   Serial.begin(115200);
 
-  // Cấu hình cảm biến là input
-  pinMode(5, INPUT);
-
-  // Kết nối WiFi
   WiFi.begin(ssid, password);
+  Serial.println("Connecting");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.print(".");
   }
   Serial.println("");
-  Serial.println("WiFi connected");
-
-  //  IN địa chỉ IP
+  Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
+
+  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 }
 
 void loop()
 {
-
-  // Kiểm tra trạng thái cảm biến
-  int new_motion_sensor_state = 100;
-  // Nếu khác thì gửi thông tin lên server
-  // if (new_motion_sensor_state != motion_sensor_state)
-  // {
-
-  // Đặt trạng thái mới
-  // motion_sensor_state = new_motion_sensor_state;
-
-  Serial.print("Connecting to ");
-  Serial.println(host);
-
-  // Sử dụng WiFiClient để tạo kết nối TCP
-  WiFiClient client;
-  const int httpPort = 8000;
-  if (!client.connect(host, httpPort))
+  //Send an HTTP POST request every 10 minutes
+  if ((millis() - lastTime) > timerDelay)
   {
-    Serial.println("connection failed");
-    return;
+    //Check WiFi connection status
+    if (WiFi.status() == WL_CONNECTED)
+    {
+      HTTPClient http;
+
+      // Your Domain name with URL path or IP address with path
+      http.begin(serverName);
+
+      // Specify content-type header
+      // http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      // // Data to send with HTTP POST
+      // String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&value1=24.25&value2=49.54&value3=1005.14";
+      // // Send HTTP POST request
+      // int httpResponseCode = http.POST(httpRequestData);
+
+      // If you need an HTTP request with a content type: application/json, use the following:
+      http.addHeader("Content-Type", "application/json");
+      int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":\"24.25\",\"value2\":\"49.54\",\"value3\":\"1005.14\"}");
+
+      // If you need an HTTP request with a content type: text/plain
+      //http.addHeader("Content-Type", "text/plain");
+      //int httpResponseCode = http.POST("Hello, World!");
+
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+
+      // Free resources
+      http.end();
+    }
+    else
+    {
+      Serial.println("WiFi Disconnected");
+    }
+    lastTime = millis();
   }
-
-  // Gửi yêu cầu tới server
-  client.print(String("POST /motion?state=") + String(new_motion_sensor_state) + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  delay(100);
-
-  // Đọc phản hồi từ server
-  while (client.available())
-  {
-    String line = client.readStringUntil('\r');
-    Serial.print(line);
-  }
-
-  Serial.println();
-  Serial.println("closing connection");
-  // }
 }

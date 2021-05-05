@@ -53,6 +53,13 @@ app.post("/api/users", function (req, res) {
   res.send("Data received: " + data);
 });
 
+//
+app.post("/update-sensor", function (req, res) {
+  data = parseFloat(req.body.value1);
+  console.log("update sensor-->", data, typeof data);
+  res.send("sensor received: " + data);
+});
+
 // Thay đổi trạng thái cảm biến cd
 app.post("/motion", function (req, res) {
   motion = req.query;
