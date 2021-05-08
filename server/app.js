@@ -9,6 +9,7 @@ const { readdirSync } = require("fs");
 require("dotenv").config();
 
 let data;
+var sensorData;
 
 // Biến cho cảm biến chuyển động
 var motion = 0;
@@ -55,9 +56,16 @@ app.post("/api/users", function (req, res) {
 
 //
 app.post("/update-sensor", function (req, res) {
-  data = parseFloat(req.body.value1);
+  data = req.body;
+  sensorData = data;
   console.log("update sensor-->", data, typeof data);
   res.send("sensor received: " + data);
+});
+//
+app.get("/update-sensor", function (req, res) {
+  data = req.body;
+  console.log("update sensor GET-->", data, typeof data);
+  res.json(sensorData);
 });
 
 // Thay đổi trạng thái cảm biến cd
