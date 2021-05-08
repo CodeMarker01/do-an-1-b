@@ -16,34 +16,42 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
 
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial2);
 
+//NEXTION CONTROL ADD USER PAGE
+//PAGE 2
 NexText text_state_p2 = NexText(2, 1, "t0"); 
 
 NexText text_state = NexText(2, 4, "t1");
 NexButton button_fing_p2 = NexButton(2, 2, "b0");
 NexButton button_rfid_p2 = NexButton(2, 3, "b1");
 
-//NEXTION CONTROL ADD USER PAGE
-NexText text_fing = NexText(4, 4, "t2"); 
-NexText text_rfid = NexText(4, 7, "t4"); 
-NexText text_name = NexText(4, 16, "t10"); 
-NexText text_positon = NexText(4, 17, "t11"); 
-NexText text_gmail = NexText(4, 18, "t12"); 
-NexText text_pass = NexText(4, 9, "t13"); 
+//PAGE 4
+NexText text_fing_p4 = NexText(4, 3, "t2"); 
+NexText text_rfid_p4 = NexText(4, 5, "t4"); 
 
+NexText text_name_p4 = NexText(4, 10, "t10"); 
+NexText text_pos_p4 = NexText(4, 11, "t11"); 
+NexText text_gmail_p4 = NexText(4, 12, "t12"); 
+NexText text_pass_p4 = NexText(4, 13, "t13"); 
+
+NexTouch button_fing_p4 = NexButton(4, 15, "m0");
+NexTouch button_rfid_p4 = NexButton(4, 16, "m1");
+NexButton button_done_p4 = NexButton(4, 14, "b6");
+
+//PAGE KEYBOARD 5,6,7,8
 NexText text_dis_p5 = NexText(5, 2, "t0"); 
 NexText text_dis_p6 = NexText(6, 2, "t0"); 
 NexText text_dis_p7 = NexText(7, 2, "t0"); 
 NexText text_dis_p8 = NexText(8, 2, "t0"); 
 
-NexTouch button_fing_p4 = NexButton(4, 15, "m0");
-NexTouch button_rfid_p4 = NexButton(4, 16, "m1");
 NexButton button_name_p5 = NexButton(5, 34, "b28");
 NexButton button_pos_p6 = NexButton(6, 34, "b28");
 NexButton button_gmail_p7 = NexButton(7, 34, "b28");
 NexButton button_pass_p8 = NexButton(8, 34, "b28");
-NexButton button_done_p4 = NexButton(4, 14, "b6");
 
+
+//DEFINE PAGE
 NexPage page2 = NexPage(2,0,"page_user");
+NexPage page3 = NexPage(3,0,"page_admin");
 NexPage page4 = NexPage(4,0,"add_user");
 
 //KHAI BAO BIEN SU DUNG
@@ -51,6 +59,7 @@ int ID, ID_CARD;
 char ID_S[10], ID_CARD_S[20], TIME[20];
 long previousMillis = 0;
 char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textpass_p4c[20];
+uint8_t id=0;
 
 //KHAI BAO WIFI
 const char *ssid = "@@";
@@ -113,55 +122,70 @@ void brfidp2PopCallback(void *ptr)
 
 void bfingp4_PopCallback(void *ptr) //gui id len
 {
-
-  text_fing.setText("ID");
+  text_fing_p4.setText("ID");
+  id++;
+  if (id == 0) 
+  {// ID #0 not allowed, try again!
+     return;
+  }
+  Serial.print("Enrolling ID #");
+  Serial.println(id);
+  while (!  getFingerprintEnroll() );
 }
 void brfidp4_PopCallback(void *ptr)
 {
   
-  text_rfid.setText("ID");
+  text_rfid_p4.setText("ID");
 }
 void bnamep5_PopCallback(void *ptr) 
 {
-  //text_state.setText("on");
-  //text_name.getText(textname_p4c, 20);
   text_dis_p5.getText(textname_p4c, 20);
   Serial.println(textname_p4c);
-  
-  //text_name.setText(NULL);
+  text_dis_p5.setText(NULL);
   page4.show();
-  text_state.setText(textname_p4c);
+  text_name_p4.setText(textname_p4c); 
 }
 void bposp6_PopCallback(void *ptr)
 {
-  //text_state.setText("off");
-  text_positon.getText(textpos_p4c, 20); //char
+  text_dis_p6.getText(textpos_p4c, 20);
   Serial.println(textpos_p4c);
-  //text_positon.setText(NULL);
+  text_dis_p6.setText(NULL);
   page4.show();
+  text_pos_p4.setText(textpos_p4c);
 }
 void bgmailp7_PopCallback(void *ptr) 
 {
-  
-  text_gmail.getText(textgmail_p4c, 20);
+  text_dis_p7.getText(textgmail_p4c, 20);
   Serial.println(textgmail_p4c);
-  //text_gmail.setText(NULL);
+  text_dis_p7.setText(NULL);
   page4.show();
+  text_gmail_p4.setText(textgmail_p4c); 
 }
 void bpassp8_PopCallback(void *ptr)
 {
-  text_pass.getText(textpass_p4c, 20);
+  text_dis_p8.getText(textpass_p4c, 20);
   Serial.println(textpass_p4c);
-  //text_pass.setText(NULL);
+  text_dis_p8.setText(NULL);
   page4.show();
+  text_pass_p4.setText(textpass_p4c); 
 }
 void bdonep4_PopCallback(void *ptr)
 {
-//  memset(textname_p4c, NULL, 20);
-//  memset(textpos_p4c, NULL, 20);
-//  memset(textgmail_p4c, NULL, 20);
-//  memset(textpass_p4c, NULL, 20);
-  page2.show();
+  //SEND DATA TO SERVER
+  GUI_DATA();
+  //DELETE DATA STRING
+  memset(textname_p4c, NULL, 20);
+  memset(textpos_p4c, NULL, 20);
+  memset(textgmail_p4c, NULL, 20);
+  memset(textpass_p4c, NULL, 20);
+
+  //DELETE DATA HMI
+  text_name_p4.setText(NULL);
+  text_pos_p4.setText(NULL);
+  text_gmail_p4.setText(NULL);
+  text_pass_p4.setText(NULL); 
+  page3.show();
+  
 }
 
 void setup() 
@@ -338,6 +362,149 @@ if ( ! mfrc522.PICC_IsNewCardPresent())
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();  
 }
+
+//ADD FINGER
+uint8_t getFingerprintEnroll() 
+{
+  int p = -1;
+  Serial.print("Waiting for valid finger to enroll as #"); Serial.println(id);
+  while (p != FINGERPRINT_OK) {
+    p = finger.getImage();
+    switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.println(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
+    }
+  }
+
+  // OK success!
+
+  p = finger.image2Tz(1);
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+
+  Serial.println("Remove finger");
+  delay(2000);
+  p = 0;
+  while (p != FINGERPRINT_NOFINGER) {
+    p = finger.getImage();
+  }
+  Serial.print("ID "); Serial.println(id);
+  p = -1;
+  Serial.println("Place same finger again");
+  while (p != FINGERPRINT_OK) {
+    p = finger.getImage();
+    switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.print(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
+    }
+  }
+
+  // OK success!
+
+  p = finger.image2Tz(2);
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
+  }
+
+  // OK converted!
+  Serial.print("Creating model for #");  Serial.println(id);
+
+  p = finger.createModel();
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Prints matched!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_ENROLLMISMATCH) {
+    Serial.println("Fingerprints did not match");
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  Serial.print("ID "); Serial.println(id);
+  p = finger.storeModel(id);
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Stored!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_BADLOCATION) {
+    Serial.println("Could not store in that location");
+    return p;
+  } else if (p == FINGERPRINT_FLASHERR) {
+    Serial.println("Error writing to flash");
+    return p;
+  } else {
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  return true;
+}
+
 void GET_TIME()
 {
   DateTime now = rtc.now();
@@ -370,9 +537,9 @@ void GUI_DATA()
   String GMAIL = "sinhpham@gmail.com";
   String PASS = "pass1234";
   
-  String dataPost = String("{\"ID\":\" ") + ID + String("\",\"RFID\":\" ") + RFID + String("\",\"NAME\":\" ") 
-  + NAME + String("\",\"Position\":\" ") + POS + String("\",\"GMAIL\":\" ") + GMAIL + String("\",\"PASS\":\" ") 
-  + PASS + String("\",\"TIME\":\" ") + TIME + String("\" }");
+  String dataPost = String("{\"ID\":\" ") + id + String("\",\"RFID\":\" ") + RFID + String("\",\"NAME\":\" ") 
+  + textname_p4c + String("\",\"Position\":\" ") + textpos_p4c + String("\",\"GMAIL\":\" ") + textgmail_p4c + String("\",\"PASS\":\" ") 
+  + textpass_p4c + String("\",\"TIME\":\" ") + TIME + String("\" }");
   
   http.addHeader("Content-Type", "application/json");
   // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
