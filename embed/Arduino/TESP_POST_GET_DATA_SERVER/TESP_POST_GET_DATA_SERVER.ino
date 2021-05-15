@@ -1,12 +1,9 @@
-#include <ESP8266WiFi.h>
-//#include <WiFi.h>
-#include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
-#include "Arduino_JSON.h"
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Arduino_JSON.h>
 
-//#include <WiFi.h>
-
-const char *ssid = "@@";
+const char *ssid = "iPhone 12";
+//const char *ssid = "@@";
 const char *password = "Motdentam";
 const char *serverName = "http://192.168.137.1:8000/update-sensor"; // "http://115.76.176.235:8000"
 
