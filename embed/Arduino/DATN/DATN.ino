@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
+#include <EEPROM.h>
 
 #define RST_PIN        26 
 #define SS_PIN         5 
@@ -19,15 +20,13 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial2);
 //NEXTION CONTROL ADD USER PAGE
 //PAGE 2
 NexText text_state_p2 = NexText(2, 1, "t0"); 
-
-NexText text_state = NexText(2, 4, "t1");
+NexText text_infor_p2 = NexText(2, 4, "t1");
 NexButton button_fing_p2 = NexButton(2, 2, "b0");
 NexButton button_rfid_p2 = NexButton(2, 3, "b1");
 
 //PAGE 4
 NexText text_fing_p4 = NexText(4, 3, "t2"); 
 NexText text_rfid_p4 = NexText(4, 5, "t4"); 
-
 NexText text_name_p4 = NexText(4, 10, "t10"); 
 NexText text_pos_p4 = NexText(4, 11, "t11"); 
 NexText text_gmail_p4 = NexText(4, 12, "t12"); 
@@ -48,21 +47,24 @@ NexButton button_pos_p6 = NexButton(6, 34, "b28");
 NexButton button_gmail_p7 = NexButton(7, 34, "b28");
 NexButton button_pass_p8 = NexButton(8, 34, "b28");
 
-
 //DEFINE PAGE
 NexPage page2 = NexPage(2,0,"page_user");
 NexPage page3 = NexPage(3,0,"page_admin");
 NexPage page4 = NexPage(4,0,"add_user");
 
 //KHAI BAO BIEN SU DUNG
-int ID, ID_CARD;
-char ID_S[10], ID_CARD_S[20], TIME[20];
+int  ID_CHECK, ID_STORED;
+char ID_CHECK_C[20], ID_STORED_C[20];
+char TIME[20], TIME_D[10], TIME_H[10];
+byte UID_B[4];
+char UID_C[15];
+
 long previousMillis = 0;
 char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textpass_p4c[20];
-uint8_t id=0;
 
 //KHAI BAO WIFI
-const char *ssid = "@@";
+//const char *ssid = "@@";
+const char *ssid = "iPhone 12";
 const char *password = "Motdentam";
 const char *serverName = "http://192.168.137.1:8000/update-sensor"; 
 
@@ -88,7 +90,7 @@ NexTouch *nex_listen_list[] =
   NULL
 };
 
-void bfingp2PopCallback(void *ptr) 
+void bfingp2PopCallback(void *ptr) //CHECK ID
 {
   Serial.println("R305");
   text_state_p2.setText("ENTER YOUR FINGER");
@@ -96,14 +98,14 @@ void bfingp2PopCallback(void *ptr)
   while(millis() < time_now + 5000)
   {
      getFingerprintID(); 
+    ID_CHECK = finger.fingerID;
+    sprintf(ID_CHECK_C, "ID LA %d", ID_CHECK);
+    if(ID_CHECK == -1) text_infor_p2.setText("KHONG TIM THAY");  //SAI
+    else text_infor_p2.setText(ID_CHECK_C); 
   } 
-  ID = finger.fingerID;
-  GUI_DATA();
-  sprintf(ID_S, "ID LA %d", ID);
-  if(ID == 2) text_state.setText(ID_S);
-  else text_state.setText("KHONG TIM THAY");    
-  ID = 0;
-//delay(50);            //don't ned to run this at full speed.  
+  SEND_DATA_CHECK();
+  ID_CHECK = 0;
+  text_infor_p2.setText(NULL);
   text_state_p2.setText("SELECT MODE ATTENDANCE");
 }
 
@@ -115,27 +117,39 @@ void brfidp2PopCallback(void *ptr)
   while(millis() < time_now + 5000)
   {
      READ_RFID();
-     //Serial.print("ID LA:");
+     text_infor_p2.setText(UID_C);
   } 
+  text_infor_p2.setText(NULL);
+  SEND_DATA_CHECK();
+   memset(UID_C, 0, 15);
   text_state_p2.setText("SELECT MODE ATTENDANCE");
 }
 
 void bfingp4_PopCallback(void *ptr) //gui id len
 {
-  text_fing_p4.setText("ID");
-  id++;
-  if (id == 0) 
+  EEPROM.get(9, ID_STORED); 
+  ID_STORED ++;
+  EEPROM.put(9, ID_STORED);  
+  EEPROM.commit(); 
+  if (ID_STORED == 0) 
   {// ID #0 not allowed, try again!
      return;
   }
   Serial.print("Enrolling ID #");
-  Serial.println(id);
-  while (!  getFingerprintEnroll() );
+  Serial.println(ID_STORED);
+  while (!getFingerprintEnroll());
+  sprintf(ID_STORED_C, "%d", ID_STORED);
+  text_fing_p4.setText(ID_STORED_C);
 }
+
 void brfidp4_PopCallback(void *ptr)
 {
-  
-  text_rfid_p4.setText("ID");
+  unsigned long  time_now = millis(); 
+  while(millis() < time_now + 5000)
+  {
+     READ_RFID();
+     text_rfid_p4.setText(UID_C);
+  } 
 }
 void bnamep5_PopCallback(void *ptr) 
 {
@@ -143,7 +157,9 @@ void bnamep5_PopCallback(void *ptr)
   Serial.println(textname_p4c);
   text_dis_p5.setText(NULL);
   page4.show();
-  text_name_p4.setText(textname_p4c); 
+  text_name_p4.setText(textname_p4c);
+  text_fing_p4.setText(ID_STORED_C); 
+  text_rfid_p4.setText(UID_C);
 }
 void bposp6_PopCallback(void *ptr)
 {
@@ -152,6 +168,8 @@ void bposp6_PopCallback(void *ptr)
   text_dis_p6.setText(NULL);
   page4.show();
   text_pos_p4.setText(textpos_p4c);
+  text_fing_p4.setText(ID_STORED_C); 
+  text_rfid_p4.setText(UID_C);
 }
 void bgmailp7_PopCallback(void *ptr) 
 {
@@ -160,6 +178,8 @@ void bgmailp7_PopCallback(void *ptr)
   text_dis_p7.setText(NULL);
   page4.show();
   text_gmail_p4.setText(textgmail_p4c); 
+  text_fing_p4.setText(ID_STORED_C); 
+  text_rfid_p4.setText(UID_C);
 }
 void bpassp8_PopCallback(void *ptr)
 {
@@ -168,18 +188,25 @@ void bpassp8_PopCallback(void *ptr)
   text_dis_p8.setText(NULL);
   page4.show();
   text_pass_p4.setText(textpass_p4c); 
+  text_fing_p4.setText(ID_STORED_C); 
+  text_rfid_p4.setText(UID_C);
 }
 void bdonep4_PopCallback(void *ptr)
 {
   //SEND DATA TO SERVER
-  GUI_DATA();
+  SEND_DATA_STORED();
+  
   //DELETE DATA STRING
+  memset(ID_STORED_C, NULL, 20);
+  memset(UID_C, NULL, 15);
   memset(textname_p4c, NULL, 20);
   memset(textpos_p4c, NULL, 20);
   memset(textgmail_p4c, NULL, 20);
   memset(textpass_p4c, NULL, 20);
 
   //DELETE DATA HMI
+  text_fing_p4.setText(NULL);
+  text_rfid_p4.setText(NULL);
   text_name_p4.setText(NULL);
   text_pos_p4.setText(NULL);
   text_gmail_p4.setText(NULL);
@@ -197,6 +224,8 @@ void setup()
   mfrc522.PCD_Init();
   delay(5);
   nexInit();
+  EEPROM.begin(512);
+  EEPROM.commit();
   // Register the pop event callback function of the components
   button_fing_p2.attachPop(bfingp2PopCallback, &button_fing_p2);
   button_rfid_p2.attachPop(brfidp2PopCallback, &button_rfid_p2);
@@ -242,6 +271,13 @@ void setup()
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
   Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+
+  //DELETE EEPROM
+//  for (int i = 0; i < 512; i++) 
+//  {
+//    EEPROM.write(i, 0);
+//    delay(5); //Phải có delay tối thiểu 5 mili giây giữa mối lần write
+//  }
 }
 
 void loop() 
@@ -252,16 +288,14 @@ void loop()
      previousMillis = millis();
      GET_TIME();
   }
-//  Serial.println(textname_p4c);
-//  Serial.println(textpos_p4c);
-//  Serial.println(textgmail_p4c);
-//  Serial.println(textpass_p4c);
 } 
 
-
-uint8_t getFingerprintID() {
+// CHECK FINGER
+uint8_t getFingerprintID() 
+{
   uint8_t p = finger.getImage();
-  switch (p) {
+  switch (p) 
+  {
     case FINGERPRINT_OK:
       Serial.println("Image taken");
       break;
@@ -342,22 +376,35 @@ int getFingerprintIDez()
   Serial.print(" with confidence of "); Serial.println(finger.confidence);
   return finger.fingerID;
 }
+
 void READ_RFID()
 {
-if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
-  return;
+    return;
   }
+  // Select one of the cards
   if ( ! mfrc522.PICC_ReadCardSerial()) 
   {
-  return;
+    return;
   }
   Serial.println("ID thẻ: ");
-  for (byte i = 0; i < 5; i++)
+  for (byte i = 0; i < mfrc522.uid.size; i++)
   {
-    //Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0 ": " ");
-    Serial.print(mfrc522.uid.uidByte[i], HEX);
+    //Serial.print(mfrc522.uid.uidByte[i], HEX);
+    UID_B[i] = mfrc522.uid.uidByte[i];
   }
+  byte UID_SIZE = sizeof(UID_B);
+  memset(UID_C, 0, sizeof(UID_SIZE));
+
+  //COVERT BYTE TO CHAR
+  for (int y = 0; y < UID_SIZE; y++)
+  {
+    // convert byte to its ascii representation
+    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
+  }
+  Serial.println(UID_C);
   Serial.println("");
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();  
@@ -367,7 +414,7 @@ if ( ! mfrc522.PICC_IsNewCardPresent())
 uint8_t getFingerprintEnroll() 
 {
   int p = -1;
-  Serial.print("Waiting for valid finger to enroll as #"); Serial.println(id);
+  Serial.print("Waiting for valid finger to enroll as #"); Serial.println(ID_STORED);
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
     switch (p) {
@@ -419,7 +466,7 @@ uint8_t getFingerprintEnroll()
   while (p != FINGERPRINT_NOFINGER) {
     p = finger.getImage();
   }
-  Serial.print("ID "); Serial.println(id);
+  Serial.print("ID "); Serial.println(ID_STORED);
   p = -1;
   Serial.println("Place same finger again");
   while (p != FINGERPRINT_OK) {
@@ -468,7 +515,7 @@ uint8_t getFingerprintEnroll()
   }
 
   // OK converted!
-  Serial.print("Creating model for #");  Serial.println(id);
+  Serial.print("Creating model for #");  Serial.println(ID_STORED);
 
   p = finger.createModel();
   if (p == FINGERPRINT_OK) {
@@ -484,8 +531,8 @@ uint8_t getFingerprintEnroll()
     return p;
   }
 
-  Serial.print("ID "); Serial.println(id);
-  p = finger.storeModel(id);
+  Serial.print("ID "); Serial.println(ID_STORED);
+  p = finger.storeModel(ID_STORED);
   if (p == FINGERPRINT_OK) {
     Serial.println("Stored!");
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
@@ -523,10 +570,12 @@ void GET_TIME()
   Serial.print(now.second(), DEC);
   Serial.println();
   sprintf(TIME,"%d:%d:%d %d/%d/%d", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+  sprintf(TIME_H,"%02d:%02d:%02d", now.hour(), now.minute(), now.second());
+  sprintf(TIME_D,"%02d/%02d/%04d", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());  
   //Serial.println(TIME);
-  text_state.setText(TIME);  
+  //text_state.setText(TIME);  
 }
-void GUI_DATA()
+void SEND_DATA_STORED()
 {
   HTTPClient http;
   http.begin(serverName);
@@ -537,9 +586,32 @@ void GUI_DATA()
   String GMAIL = "sinhpham@gmail.com";
   String PASS = "pass1234";
   
-  String dataPost = String("{\"ID\":\" ") + id + String("\",\"RFID\":\" ") + RFID + String("\",\"NAME\":\" ") 
+  String dataPost = String("{\"ID\":\" ") + ID_STORED + String("\",\"RFID\":\" ") + UID_C + String("\",\"NAME\":\" ") 
   + textname_p4c + String("\",\"Position\":\" ") + textpos_p4c + String("\",\"GMAIL\":\" ") + textgmail_p4c + String("\",\"PASS\":\" ") 
   + textpass_p4c + String("\",\"TIME\":\" ") + TIME + String("\" }");
+  
+  http.addHeader("Content-Type", "application/json");
+  // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
+  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
+  Serial.print("HTTP Response code: ");
+  Serial.println(httpResponseCode);
+  http.end(); 
+}
+
+void SEND_DATA_CHECK()
+{
+  HTTPClient http;
+  http.begin(serverName);
+  GET_TIME();
+  String POS = "worker";
+  String RFID = "abcdrf4";
+  String NAME = "sinh pham";
+  String GMAIL = "sinhpham@gmail.com";
+  String PASS = "pass1234";
+  
+  String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
+  + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"CheckOutTime\":\" ") + TIME_H + String("\",\"CheckOutDay\":\" ") 
+  + TIME_D + String("\",\"TIME\":\" ") + TIME + String("\" }");
   
   http.addHeader("Content-Type", "application/json");
   // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
@@ -589,18 +661,6 @@ void LAY_DATA()
     Serial.println(value);
     sensorReadingsArr[i] = double(value);
   }
-  // 
-//  Serial.print("1 = ");
-//  Serial.println(sensorReadingsArr[0]);
-//  // Serial.println(typeof('sensorReadingsArr[0]'));
-//  Serial.print("2 = ");
-//  Serial.println(sensorReadingsArr[1]);
-//  Serial.print("3 = ");
-//  Serial.println(sensorReadingsArr[2]);
-//  Serial.print("4 = ");
-//  Serial.println(sensorReadingsArr[3]);
-//  Serial.print("5 = ");
-//  Serial.println(sensorReadingsArr[4]);
 
   http.end();   
 }
