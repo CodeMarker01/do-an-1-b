@@ -103,10 +103,10 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
     if(ID_CHECK == -1) text_infor_p2.setText("KHONG TIM THAY");  //SAI
     else text_infor_p2.setText(ID_CHECK_C); 
   } 
-  SEND_DATA_CHECK();
+  //SEND_DATA_CHECK();
   ID_CHECK = 0;
   text_infor_p2.setText(NULL);
-  text_state_p2.setText("SELECT MODE ATTENDANCE");
+  text_state_p2.setText("SELECT MODE");
 }
 
 void brfidp2PopCallback(void *ptr)
@@ -120,9 +120,9 @@ void brfidp2PopCallback(void *ptr)
      text_infor_p2.setText(UID_C);
   } 
   text_infor_p2.setText(NULL);
-  SEND_DATA_CHECK();
+  //SEND_DATA_CHECK();
    memset(UID_C, 0, 15);
-  text_state_p2.setText("SELECT MODE ATTENDANCE");
+  text_state_p2.setText("SELECT MODE");
 }
 
 void bfingp4_PopCallback(void *ptr) //gui id len
@@ -193,8 +193,7 @@ void bpassp8_PopCallback(void *ptr)
 }
 void bdonep4_PopCallback(void *ptr)
 {
-  //SEND DATA TO SERVER
-  SEND_DATA_STORED();
+  //SEND_DATA_STORED();
   
   //DELETE DATA STRING
   memset(ID_STORED_C, NULL, 20);
