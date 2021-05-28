@@ -9,9 +9,16 @@
 #include <Arduino_JSON.h>
 #include <EEPROM.h>
 
-#define RST_PIN        26 
-#define SS_PIN         5 
+#define RST_PIN        14
+#define SS_PIN         15
+#define SS_PIN1        26
+#define SENSOR_DOOR    34
+
+#define RELAY          33
+#define BUZZER         35
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+MFRC522 rfid1(SS_PIN1, RST_PIN); // Instance of the class
 RTC_DS1307 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -114,7 +121,8 @@ unsigned long timerDelay = 5000;
 
 unsigned long previousMillis1 = 0;
 unsigned long interval = 30000;
-  
+
+int n = 0;
 int humiTest = 321;
 int tempTest = 100;
 double sensorReadingsArr[5];
@@ -209,6 +217,9 @@ void button_pkrfidsel_PopCallback(void *ptr)
        READ_RFID();
        text_infor_p2.setText(UID_C);
     } 
+    digitalWrite(BUZZER, HIGH);
+    delay(50);
+    digitalWrite(BUZZER, LOW);
     text_infor_p2.setText(NULL);
     SEND_DATA_CHECK();
     memset(UID_C, 0, 15);  
@@ -492,6 +503,9 @@ void setup()
   nexInit();
   EEPROM.begin(512);
   EEPROM.commit();
+  pinMode(RELAY, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(SENSOR_DOOR, INPUT_PULLUP);
   // Register the pop event callback function of the components
   button_fing_p2.attachPop(bfingp2PopCallback, &button_fing_p2);
   //button_rfid_p2.attachPop(brfidp2PopCallback, &button_rfid_p2);
@@ -555,6 +569,7 @@ void setup()
 
 void loop() 
 {
+  //RECONNECT WIFI
   unsigned long currentMillis = millis();
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis1 >=interval)) 
@@ -566,6 +581,34 @@ void loop()
     previousMillis1 = currentMillis;
   }
 
+  //CHECK RFID TO OPEN DOOR
+  READ_RFID();
+  RFID1(); 
+  // CHECK_UID: SEND DATA TO SERVER TO CHECK IT. IF OK SEND '1' FOR ESP32, ELSE  SEND '0'.
+  // IF(CHECK_UID == 1) ... ELSE ...
+
+  Serial.println(digitalRead(SENSOR_DOOR));
+  if(digitalRead(SENSOR_DOOR) == 0)   //CB DONG:0 - MO: 1
+  {
+    n = 0;
+    memset(UID_C, NULL, 15);
+    digitalWrite(RELAY, HIGH);  //DONG CUA
+    Serial.println("CLOSE");
+  }
+  else if( (String(UID_C) == "A9A1EF6E") && (digitalRead(SENSOR_DOOR) == 0) && (n == 0) )
+  {
+    n = n + 1;
+    digitalWrite(RELAY, LOW);   //MO CUA
+    Serial.println("OPEN");
+  }
+  else if( (digitalRead(SENSOR_DOOR) == 0) && (n == 1) )
+  {
+    digitalWrite(RELAY, LOW);   //MO CUA
+    Serial.println("OPEN");
+  }
+  else digitalWrite(RELAY, LOW);
+
+  // LOOP NEXTION
   nexLoop(nex_listen_list);
   if(millis() - previousMillis >= 1000)
   {
@@ -663,6 +706,8 @@ int getFingerprintIDez()
 
 void READ_RFID()
 {
+  SPI.begin(); // Init SPI bus
+  mfrc522.PCD_Init(); // Init MFRC522  
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
@@ -691,7 +736,43 @@ void READ_RFID()
   Serial.println(UID_C);
   Serial.println("");
   mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();  
+  mfrc522.PCD_StopCrypto1(); 
+  SPI.end(); 
+}
+
+void RFID1()
+{
+  SPI.begin(); // Init SPI bus
+  rfid1.PCD_Init(); // Init MFRC522
+    
+  if ( ! rfid1.PICC_IsNewCardPresent()) 
+  {
+  return;
+  }
+  if ( ! rfid1.PICC_ReadCardSerial()) 
+  {
+  return;
+  }
+  Serial.println("READER 2: ");
+  for (byte i = 0; i < rfid1.uid.size; i++)
+  {
+    //Serial.print(rfid1.uid.uidByte[ii], HEX);
+    UID_B[i] = rfid1.uid.uidByte[i];
+  }
+  byte UID_SIZE = sizeof(UID_B);
+  memset(UID_C, 0, sizeof(UID_SIZE));
+  //COVERT BYTE TO CHAR
+  for (int y = 0; y < UID_SIZE; y++)
+  {
+    // convert byte to its ascii representation
+    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
+  }
+  Serial.println(UID_C);
+  Serial.println("");
+  rfid1.PICC_HaltA();
+  rfid1.PCD_StopCrypto1();
+   
+  SPI.end();
 }
 
 //ADD FINGER
