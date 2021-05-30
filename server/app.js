@@ -54,7 +54,11 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
 // route middlewares
-readdirSync("./routes").map((r) => app.use(`/api/`, require("./routes/" + r)));
+readdirSync("./routes").map((r) => {
+  console.log("routes name", `/api/${r.split(".")[0]}`);
+  return app.use(`/api/${r.split(".")[0]}`, require("./routes/" + r));
+});
+//localhost/api/users
 
 // route
 app.get("/api", (req, res) => {

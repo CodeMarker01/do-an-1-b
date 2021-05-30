@@ -35,6 +35,6 @@ router.get("/auth", authCheck, getUserByToken);
 
 //import
 const { createOrUpdateUser } = require("../controllers/auth");
-router.get("/create-or-update-user", createOrUpdateUser);
+router.get("/create-user", createOrUpdateUser);
 
 module.exports = router;

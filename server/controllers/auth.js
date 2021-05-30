@@ -88,7 +88,7 @@ exports.createUser = async (req, res) => {
       { expiresIn: "5 days" },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        res.json({ token, name });
       }
     );
   } catch (err) {
