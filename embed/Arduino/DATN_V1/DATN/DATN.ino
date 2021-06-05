@@ -15,7 +15,7 @@
 #define SENSOR_DOOR    34
 
 #define RELAY          33
-#define BUZZER         35
+#define BUZZER         13
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522 rfid1(SS_PIN1, RST_PIN); // Instance of the class
@@ -25,97 +25,104 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial2);
 
 //NEXTION CONTROL ADD USER PAGE
+//PAGE 1
+NexText text_time_p0 = NexText(0, 6, "t5"); 
+NexText text_connect_p0 = NexText(0, 7, "t7"); 
+NexButton button_user_p1 = NexButton(1, 2, "b0");
 //PAGE 2
 NexText text_state_p2 = NexText(2, 1, "t0"); 
 NexText text_infor_p2 = NexText(2, 4, "t1");
 NexButton button_fing_p2 = NexButton(2, 2, "b0");
 NexButton button_rfid_p2 = NexButton(2, 3, "b1");
+NexRadio  select_checkin_p2 = NexRadio(2, 5, "r0");
+NexRadio  select_checkout_p2 = NexRadio(2, 6, "r1");
 
 //PAGE key_rfid_select 
 NexText text_pkrfidsel = NexText(7, 1, "t0");
-NexButton button_pkrfidsel = NexButton(7, 33, "b28");
+NexButton button_pkrfidsel = NexButton(7, 10, "b28");
 
 //PAGE key_pass_admin
 NexText text_pkpassad = NexText(8, 1, "t0");
-NexButton button_pkpassad = NexButton(8, 33, "b28");
+NexButton button_pkpassad = NexButton(8, 10, "b28");
 
-//PAGE ADMIN (4)
-NexText text_fing_p4 = NexText(4, 3, "t2"); 
-NexText text_rfid_p4 = NexText(4, 5, "t4"); 
-NexText text_name_p4 = NexText(4, 10, "t10"); 
-NexText text_pos_p4 = NexText(4, 11, "t11"); 
-NexText text_gmail_p4 = NexText(4, 12, "t12"); 
-NexText text_pass_p4 = NexText(4, 13, "t13"); 
-NexText text_pass2_p4 = NexText(4, 17, "t14"); 
+//PAGE ADD USER 
+NexText text_fing_p4 = NexText(4, 10, "t9"); 
+NexText text_rfid_p4 = NexText(4, 11, "t10"); 
+NexText text_name_p4 = NexText(4, 12, "t11"); 
+NexText text_pos_p4 = NexText(4, 13, "t12"); 
+NexText text_gmail_p4 = NexText(4, 14, "t13"); 
+NexText text_username_p4 = NexText(4, 15, "t14"); 
+NexText text_pass_p4 = NexText(4, 16, "t15"); 
+NexText text_pass2_p4 = NexText(4, 17, "t16"); 
 
 NexTouch button_fing_p4 = NexButton(4, 18, "m0");
 NexTouch button_rfid_p4 = NexButton(4, 19, "m1");
-NexButton button_exit_p4 = NexButton(4, 15, "b0");
-NexButton button_done_p4 = NexButton(4, 14, "b6");
+NexButton button_exit_p4 = NexButton(4, 26, "b0");
+NexButton button_done_p4 = NexButton(4, 27, "b1");
 
-//PAGE KEYBOARD 9,10,11,12,13
-NexText text_dis_p5 = NexText(9, 1, "t0"); 
-NexText text_dis_p6 = NexText(10, 1, "t0"); 
-NexText text_dis_p7 = NexText(11, 1, "t0"); 
-NexText text_dis_p8 = NexText(12, 1, "t0"); 
-NexText text_dis_p13 = NexText(13, 1, "t0"); 
+//PAGE KEYBOARD ADD USER
+NexText text_dis_pkeyname = NexText(9, 1, "t0"); 
+NexText text_dis_pkeypos = NexText(10, 1, "t0"); 
+NexText text_dis_pkeygmail = NexText(11, 1, "t0"); 
+NexText text_dis_pkeyusername = NexText(12, 1, "t0"); 
+NexText text_dis_pkeypass = NexText(13, 1, "t0"); 
+NexText text_dis_pkeypass2 = NexText(14, 1, "t0"); 
 
-NexButton button_name_p5 = NexButton(9, 33, "b28");
-NexButton button_pos_p6 = NexButton(10, 33, "b28");
-NexButton button_gmail_p7 = NexButton(11, 33, "b28");
-NexButton button_pass_p8 = NexButton(12, 33, "b28");
-NexButton button_pass2_p8 = NexButton(13, 33, "b28");
+NexButton button_enter_pkeyname = NexButton(9, 10, "b28");
+NexButton button_enter_pkeypos = NexButton(10, 10, "b28");
+NexButton button_enter_pkeygmail = NexButton(11, 10, "b28");
+NexButton button_enter_pkeyusername = NexButton(12, 10, "b28");
+NexButton button_enter_pkeypass = NexButton(13, 10, "b28");
+NexButton button_enter_pkeypass2 = NexButton(14, 10, "b28");
 
 //PAGE KEYBOARD DELETE
-NexText text_dis_delall = NexText(14, 1, "t0"); 
-NexText text_dis_delid = NexText(15, 1, "t0");
-NexText text_dis_pdeluser = NexText(5, 5, "t1"); 
-NexButton button_enter_pdelall = NexButton(14, 33, "b28");
-NexButton button_enter_pdelid = NexButton(15, 33, "b28");
+NexText text_dis_delall = NexText(15, 1, "t0"); 
+NexText text_dis_delid = NexText(16, 1, "t0");
+NexText text_dis_pdeluser = NexText(5, 4, "t1"); 
+NexButton button_enter_pdelall = NexButton(15, 10, "b28");
+NexButton button_enter_pdelid = NexButton(16, 10, "b28");
 
 //PAGE SET TAG TEMPORARY
-NexText text_rfid_psettemp = NexText(6, 5, "t5"); 
-NexText text_pos_psettemp = NexText(6, 6, "t6"); 
-NexText text_dur_psettemp = NexText(6, 7, "t7");
-NexText text_pos_pkeytemp = NexText(16, 1, "t0"); 
-NexText text_dur_pkeytemp = NexText(17, 1, "t0"); 
+NexText text_rfid_psettemp = NexText(6, 5, "t4"); 
+NexText text_pos_psettemp = NexText(6, 6, "t5"); 
+NexText text_dur_psettemp = NexText(6, 7, "t6");
+NexText text_pos_pkeytemp = NexText(17, 1, "t0"); 
+NexText text_dur_pkeytemp = NexText(18, 1, "t0"); 
 
-NexTouch button_rfid_psettemp = NexButton(6, 10, "m0");
-NexButton button_pos_pkeytemp = NexButton(16, 33, "b28");
-NexButton button_dur_pkeytemp = NexButton(17, 33, "b28");
-NexButton button_exit_psettemp = NexButton(6, 8, "b0");
-NexButton button_done_psettemp = NexButton(6, 9, "b1");
+NexTouch button_rfid_psettemp = NexButton(6, 8, "m0");
+NexButton button_pos_pkeytemp = NexButton(17, 10, "b28");
+NexButton button_dur_pkeytemp = NexButton(18, 10, "b28");
+NexButton button_exit_psettemp = NexButton(6, 11, "b0");
+NexButton button_done_psettemp = NexButton(6, 12, "b1");
 
 //DEFINE PAGE
+NexPage page0 = NexPage(0,0,"wait");
 NexPage page1 = NexPage(1,0,"select");
-NexPage page2 = NexPage(2,0,"page_user");
-NexPage page3 = NexPage(3,0,"page_admin");
+NexPage page2 = NexPage(2,0,"user");
+NexPage page3 = NexPage(3,0,"admin");
 NexPage page4 = NexPage(4,0,"add_user");
 NexPage page5 = NexPage(5,0,"del_user");
 NexPage page6 = NexPage(6,0,"set_temp");
 
 //KHAI BAO BIEN SU DUNG
 int  ID_CHECK, ID_STORED, ID_DEL;
+uint32_t   ENA_CHECKIN, ENA_CHECKOUT;
 char ID_CHECK_C[20], ID_STORED_C[20], ID_DEL_C[20], ID_DEL_C2[20];
-char TIME[20], TIME_D[10], TIME_H[10];
+char TIME_ALL[30], TIME_D[15], TIME_H[10];
 byte UID_B[4];
 char UID_C[15];
 
 long previousMillis = 0;
-char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textpass_p4c[20], textpass2_p4c[20];
+char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textusern_p4c[20], textpass_p4c[20], textpass2_p4c[20];
 char textpos_psettempc[20], textdur_psettempc[20];
 char pass_pkrfidselc[12], pass_pkpassadc[8];
 char pass_pdelallc[8];
 
 //KHAI BAO WIFI
-//const char *ssid = "iPhone 12";
-//const char *ssid = "@@@";
-//const char *password = "12345678";
 const char *ssid = "TANG 2 - 2";
 const char *password = "0936120886";
-//const char *serverName = "http://192.168.1.11:8000/update-sensor"; 
 //const char *serverName = "http://192.168.0.116:8000/update-sensor"; // WIFI TANG 2-1
-const char *serverName = "http://192.168.0.106:8000/update-sensor"; //WIFI TANG 2-2
+const char *serverName = "http://192.168.0.111:8000/update-sensor";  //WIFI TANG 2-2 createUser
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
@@ -131,15 +138,17 @@ String httpGETRequest(const char *serverName);
 //KHAI BAO DOI TUONG CHAM
 NexTouch *nex_listen_list[] = 
 {
+  &button_user_p1,
   &button_fing_p2,
   &button_rfid_p2,
   &button_fing_p4,
   &button_rfid_p4,
-  &button_name_p5,
-  &button_pos_p6,
-  &button_gmail_p7,
-  &button_pass_p8,
-  &button_pass2_p8,
+  &button_enter_pkeyname,
+  &button_enter_pkeypos,
+  &button_enter_pkeygmail,
+  &button_enter_pkeyusername,
+  &button_enter_pkeypass,
+  &button_enter_pkeypass2,
   &button_exit_p4,
   &button_done_p4,
   &button_enter_pdelall,
@@ -154,22 +163,43 @@ NexTouch *nex_listen_list[] =
   &button_pkpassad,
   NULL
 };
-
+void button_user_p1_PopCallback(void *ptr)
+{
+  select_checkin_p2.getValue(&ENA_CHECKIN);
+  select_checkout_p2.getValue(&ENA_CHECKOUT);
+  Serial.print("checkin: ");
+  Serial.println(ENA_CHECKIN);
+  Serial.print("checkout: ");
+  Serial.println(ENA_CHECKOUT);
+  if( (ENA_CHECKIN==1)&&(ENA_CHECKOUT==0) || (ENA_CHECKIN==0)&&(ENA_CHECKOUT==1))
+  {
+    page2.show();  
+  }
+//  else 
+//  {
+//    page1.show();
+//  }
+}
 void bfingp2PopCallback(void *ptr) //CHECK ID
 {
+  text_time_p0.setText("hi sinh");
   Serial.println("R305");
+  digitalWrite(BUZZER, HIGH);
+  delay(50);
+  digitalWrite(BUZZER, LOW);
   text_state_p2.setText("ENTER YOUR FINGER");
   unsigned long  time_now = millis();   
   while(millis() < time_now + 5000)
   {
-     getFingerprintID(); 
+    getFingerprintID(); 
     ID_CHECK = finger.fingerID;
     sprintf(ID_CHECK_C, "ID LA %d", ID_CHECK);
+    //CHECK ID -> LAY NAME
 
   } 
-  if(ID_CHECK == 65406) 
+  if( (ID_CHECK == 65406) || (ID_CHECK == 0)) 
   {
-    text_infor_p2.setText("ID ERROR");  //SAI
+    text_infor_p2.setText("ID ERROR");  //SAI --> THIEU K NHAP
     delay(1000);
   }
   else 
@@ -177,31 +207,15 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
     text_infor_p2.setText(ID_CHECK_C); 
     SEND_DATA_CHECK();
   }
-  
   ID_CHECK = 0;
   text_infor_p2.setText(NULL);
   text_state_p2.setText("SELECT MODE");
+  page1.show();
+  
 }
-
-//void brfidp2PopCallback(void *ptr)
-//{
-//  Serial.println("RFID");
-//  text_state_p2.setText("ENTER YOUR TAG RFID");
-//  unsigned long  time_now = millis();   
-//  while(millis() < time_now + 5000)
-//  {
-//     READ_RFID();
-//     text_infor_p2.setText(UID_C);
-//  } 
-//  text_infor_p2.setText(NULL);
-//  SEND_DATA_CHECK();
-//   memset(UID_C, 0, 15);
-//  text_state_p2.setText("SELECT MODE");
-//}
 
 void button_pkrfidsel_PopCallback(void *ptr)
 {
-
   text_pkrfidsel.getText(pass_pkrfidselc, 20);
   text_pkrfidsel.setText(NULL);
   Serial.println(String(pass_pkrfidselc));
@@ -217,12 +231,11 @@ void button_pkrfidsel_PopCallback(void *ptr)
        READ_RFID();
        text_infor_p2.setText(UID_C);
     } 
-    digitalWrite(BUZZER, HIGH);
-    delay(50);
-    digitalWrite(BUZZER, LOW);
     text_infor_p2.setText(NULL);
     SEND_DATA_CHECK();
     memset(UID_C, 0, 15);  
+    text_state_p2.setText("SELECT MODE");
+    page1.show();
   }
   else 
   {
@@ -230,9 +243,9 @@ void button_pkrfidsel_PopCallback(void *ptr)
     text_infor_p2.setText("THE REQUEST NOT CORRECT");
     delay(1000);
     text_infor_p2.setText("                       ");
+    page1.show();
+    memset(pass_pkrfidselc, 0, 15);
   }
-  text_state_p2.setText("SELECT MODE");
-  memset(pass_pkrfidselc, 0, 15);
 }
 void button_pkpassad_PopCallback(void *ptr)
 {
@@ -277,54 +290,65 @@ void brfidp4_PopCallback(void *ptr)
   {
      READ_RFID();
      text_rfid_p4.setText("ENTER YOUR TAG RFID");
+     text_rfid_p4.setText(UID_C); // NẰM NGOÀI HAY TRONG ?
   } 
-   text_rfid_p4.setText(UID_C);                       // NẰM NGOÀI HAY TRONG ?
+                          
 }
 void bnamep5_PopCallback(void *ptr) 
 {
-  text_dis_p5.getText(textname_p4c, 20);
+  text_dis_pkeyname.getText(textname_p4c, 20);
   Serial.println(textname_p4c);
-  text_dis_p5.setText(NULL);
+  text_dis_pkeyname.setText(NULL);
   page4.show();
-  text_name_p4.setText("heloooo -----");
-  text_fing_p4.setText(ID_STORED_C); 
-  text_rfid_p4.setText(UID_C);
+  text_name_p4.setText(textname_p4c);
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
 }
 void bposp6_PopCallback(void *ptr)
 {
-  text_dis_p6.getText(textpos_p4c, 20);
+  text_dis_pkeypos.getText(textpos_p4c, 20);
   Serial.println(textpos_p4c);
-  text_dis_p6.setText(NULL);
+  text_dis_pkeypos.setText(NULL);
   page4.show();
   text_pos_p4.setText(textpos_p4c);
-  text_fing_p4.setText(ID_STORED_C); 
-  text_rfid_p4.setText(UID_C);
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
 }
 void bgmailp7_PopCallback(void *ptr) 
 {
-  text_dis_p7.getText(textgmail_p4c, 20);
+  text_dis_pkeygmail.getText(textgmail_p4c, 20);
   Serial.println(textgmail_p4c);
-  text_dis_p7.setText(NULL);
+  text_dis_pkeygmail.setText(NULL);
   page4.show();
   text_gmail_p4.setText(textgmail_p4c); 
-  text_fing_p4.setText(ID_STORED_C); 
-  text_rfid_p4.setText(UID_C);
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
+}
+void benter_pkeyusername_PopCallback(void *ptr)
+{
+  text_dis_pkeyusername.getText(textusern_p4c, 20);
+  Serial.println(textusern_p4c);
+  text_dis_pkeyusername.setText(NULL);
+  page4.show();
+  text_username_p4.setText(textusern_p4c); 
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
 }
 void bpassp8_PopCallback(void *ptr)
 {
-  text_dis_p8.getText(textpass_p4c, 20);
+  text_dis_pkeypass.getText(textpass_p4c, 20);
   Serial.println(textpass_p4c);
-  text_dis_p8.setText(NULL);
+  text_dis_pkeypass.setText(NULL);
   page4.show();
   text_pass_p4.setText(textpass_p4c); 
-  text_fing_p4.setText(ID_STORED_C); 
-  text_rfid_p4.setText(UID_C);
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
 }
 void bpass2p8_PopCallback(void *ptr)
 {
-  text_dis_p13.getText(textpass2_p4c, 20);
+  text_dis_pkeypass2.getText(textpass2_p4c, 20);
   Serial.println(textpass2_p4c);
-  text_dis_p13.setText(NULL);
+  text_dis_pkeypass2.setText(NULL);
   page4.show();
   if(String(textpass2_p4c) == String(textpass_p4c))
   {
@@ -340,8 +364,8 @@ void bpass2p8_PopCallback(void *ptr)
     Serial.println("PASS2: ");
     Serial.println(textpass2_p4c); 
   }
-  text_fing_p4.setText(ID_STORED_C); 
-  text_rfid_p4.setText(UID_C);
+//  text_fing_p4.setText(ID_STORED_C); 
+//  text_rfid_p4.setText(UID_C);
 }
 void bexitp4_PopCallback(void *ptr)
 {
@@ -351,6 +375,7 @@ void bexitp4_PopCallback(void *ptr)
   memset(textname_p4c, NULL, 20);
   memset(textpos_p4c, NULL, 20);
   memset(textgmail_p4c, NULL, 20);
+  memset(textusern_p4c, NULL, 20);
   memset(textpass_p4c, NULL, 20);
   memset(textpass2_p4c, NULL, 20);
   //DELETE DATA HMI
@@ -359,18 +384,13 @@ void bexitp4_PopCallback(void *ptr)
   text_name_p4.setText(NULL);
   text_pos_p4.setText(NULL);
   text_gmail_p4.setText(NULL);
+  text_username_p4.setText(NULL);
   text_pass_p4.setText(NULL); 
   text_pass2_p4.setText(NULL); 
   page3.show();  
 }
 void bdonep4_PopCallback(void *ptr)
 {
-//  if( (sizeof(ID_STORED_C) > 1) && (sizeof(UID_C) > 1) && (sizeof(textname_p4c) > 1) && (sizeof(textpos_p4c) > 1) && (sizeof(textgmail_p4c) > 1) 
-//  && (sizeof(textpass_p4c) > 1) && (sizeof(textpass2_p4c) > 1) )
-//  {
-//    SEND_DATA_STORED();
-//  }
-//  else page4.show();
   SEND_DATA_STORED();
   
   //DELETE DATA STRING
@@ -379,6 +399,7 @@ void bdonep4_PopCallback(void *ptr)
   memset(textname_p4c, NULL, 20);
   memset(textpos_p4c, NULL, 20);
   memset(textgmail_p4c, NULL, 20);
+  memset(textusern_p4c, NULL, 20);
   memset(textpass_p4c, NULL, 20);
   memset(textpass2_p4c, NULL, 20);
   //DELETE DATA HMI
@@ -387,9 +408,10 @@ void bdonep4_PopCallback(void *ptr)
   text_name_p4.setText(NULL);
   text_pos_p4.setText(NULL);
   text_gmail_p4.setText(NULL);
+  text_username_p4.setText(NULL);
   text_pass_p4.setText(NULL); 
   text_pass2_p4.setText(NULL); 
-  page3.show();
+  page3.show(); 
 }
 
 //PAGE DELETE
@@ -406,6 +428,14 @@ void benter_pdelall_PopCallback(void *ptr)
     text_dis_pdeluser.setText("DATABASE IS EMPTY");
     delay(2000);
     text_dis_pdeluser.setText(NULL);
+
+    //DELETE EEPROM
+    for (int i = 0; i < 512; i++) 
+    {
+      EEPROM.write(i, 0);
+      delay(5); //Phải có delay tối thiểu 5 mili giây giữa mối lần write
+    }
+    ID_STORED = 1;    // RESET ID
   }
   else
   {
@@ -417,14 +447,6 @@ void benter_pdelall_PopCallback(void *ptr)
 }
 void benter_pdelid_PopCallback(void *ptr)
 {
-  //DELETE EEPROM
-  for (int i = 0; i < 512; i++) 
-  {
-    EEPROM.write(i, 0);
-    delay(5); //Phải có delay tối thiểu 5 mili giây giữa mối lần write
-  }
-  ID_STORED = 1;    // RESET ID
-  
   text_dis_delid.getText(ID_DEL_C, 20);
   text_dis_delid.setText(NULL);
   Serial.println(String(ID_DEL_C));
@@ -494,9 +516,9 @@ void bdone_pkeytemp_PopCallback(void *ptr)
 
 void setup() 
 {
-  //Serial.begin(9600);
-  Serial2.begin(115200);
-  finger.begin(57600);
+  Serial.begin(9600);
+  Serial1.begin(115200); //115200 HMI 
+  finger.begin(57600); //R305
   SPI.begin();
   mfrc522.PCD_Init();
   delay(5);
@@ -507,16 +529,16 @@ void setup()
   pinMode(BUZZER, OUTPUT);
   pinMode(SENSOR_DOOR, INPUT_PULLUP);
   // Register the pop event callback function of the components
+  button_user_p1.attachPop(button_user_p1_PopCallback, &button_user_p1);
   button_fing_p2.attachPop(bfingp2PopCallback, &button_fing_p2);
-  //button_rfid_p2.attachPop(brfidp2PopCallback, &button_rfid_p2);
-
   button_fing_p4.attachPop(bfingp4_PopCallback, &button_fing_p4);
   button_rfid_p4.attachPop(brfidp4_PopCallback, &button_rfid_p4);
-  button_name_p5.attachPop(bnamep5_PopCallback, &button_name_p5);
-  button_pos_p6.attachPop(bposp6_PopCallback, &button_pos_p6);
-  button_gmail_p7.attachPop(bgmailp7_PopCallback, &button_gmail_p7);
-  button_pass_p8.attachPop(bpassp8_PopCallback, &button_pass_p8);
-  button_pass2_p8.attachPop(bpass2p8_PopCallback, &button_pass2_p8);
+  button_enter_pkeyname.attachPop(bnamep5_PopCallback, &button_enter_pkeyname);
+  button_enter_pkeypos.attachPop(bposp6_PopCallback, &button_enter_pkeypos);
+  button_enter_pkeygmail.attachPop(bgmailp7_PopCallback, &button_enter_pkeygmail);
+  button_enter_pkeyusername.attachPop(benter_pkeyusername_PopCallback, &button_enter_pkeyusername);
+  button_enter_pkeypass.attachPop(bpassp8_PopCallback, &button_enter_pkeypass);
+  button_enter_pkeypass2.attachPop(bpass2p8_PopCallback, &button_enter_pkeypass2);
   button_exit_p4.attachPop(bexitp4_PopCallback, &button_exit_p4);
   button_done_p4.attachPop(bdonep4_PopCallback, &button_done_p4);  
   button_enter_pdelall.attachPop(benter_pdelall_PopCallback, &button_enter_pdelall);
@@ -549,8 +571,9 @@ void setup()
   {
     Serial.println("RTC is NOT running, let's set the time!");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-     //rtc.adjust(DateTime(2021, 5, 3, 14, 38, 0)); // YEAR/MON/DAY/HOUR/MINUTE/SECOND
+    
   }
+  //rtc.adjust(DateTime(2021, 6, 5, 17, 12, 0)); // YEAR/MON/DAY/HOUR/MINUTE/SECOND
 
 //WIFI
   WiFi.begin(ssid, password);
@@ -559,7 +582,9 @@ void setup()
   {
     delay(500);
     Serial.print(".");
+    text_connect_p0.setText("CONNECT: ERROR");
   }
+  text_connect_p0.setText("CONNECT: OK");
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
@@ -574,39 +599,33 @@ void loop()
   // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
   if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis1 >=interval)) 
   {
+    //text_connect_p0.setText("CONNECT: ERROR");
     Serial.print(millis());
     Serial.println("Reconnecting to WiFi...");
     WiFi.disconnect();
     WiFi.reconnect();
     previousMillis1 = currentMillis;
   }
+  //else text_connect_p0.setText("CONNECT: OK");
 
   //CHECK RFID TO OPEN DOOR
   READ_RFID();
-  RFID1(); 
+  READ_RFID1(); 
   // CHECK_UID: SEND DATA TO SERVER TO CHECK IT. IF OK SEND '1' FOR ESP32, ELSE  SEND '0'.
   // IF(CHECK_UID == 1) ... ELSE ...
 
   Serial.println(digitalRead(SENSOR_DOOR));
   if(digitalRead(SENSOR_DOOR) == 0)   //CB DONG:0 - MO: 1
   {
-    n = 0;
+    digitalWrite(RELAY, HIGH); //CLOSE
+    Serial.println("CLOSE DOOR");
+  }
+  if( (String(UID_C) == "A9A1EF6E"))
+  {
+    digitalWrite(RELAY, LOW); //OPEN
+    Serial.println("OPEN DOOR");
     memset(UID_C, NULL, 15);
-    digitalWrite(RELAY, HIGH);  //DONG CUA
-    Serial.println("CLOSE");
   }
-  else if( (String(UID_C) == "A9A1EF6E") && (digitalRead(SENSOR_DOOR) == 0) && (n == 0) )
-  {
-    n = n + 1;
-    digitalWrite(RELAY, LOW);   //MO CUA
-    Serial.println("OPEN");
-  }
-  else if( (digitalRead(SENSOR_DOOR) == 0) && (n == 1) )
-  {
-    digitalWrite(RELAY, LOW);   //MO CUA
-    Serial.println("OPEN");
-  }
-  else digitalWrite(RELAY, LOW);
 
   // LOOP NEXTION
   nexLoop(nex_listen_list);
@@ -614,9 +633,85 @@ void loop()
   {
      previousMillis = millis();
      GET_TIME();
+     text_time_p0.setText(TIME_ALL);
   }
 } 
 
+void READ_RFID()
+{
+  SPI.begin(); // Init SPI bus
+  mfrc522.PCD_Init(); // Init MFRC522  
+  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  Serial.println("ID thẻ: ");
+  for (byte i = 0; i < mfrc522.uid.size; i++)
+  {
+    //Serial.print(mfrc522.uid.uidByte[i], HEX);
+    UID_B[i] = mfrc522.uid.uidByte[i];
+  }
+  byte UID_SIZE = sizeof(UID_B);
+  memset(UID_C, 0, sizeof(UID_SIZE));
+
+  //COVERT BYTE TO CHAR
+  for (int y = 0; y < UID_SIZE; y++)
+  {
+    // convert byte to its ascii representation
+    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
+  }
+  digitalWrite(BUZZER, HIGH);
+  delay(50);
+  digitalWrite(BUZZER, LOW);
+  Serial.println(UID_C);
+  Serial.println("");
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1(); 
+  SPI.end(); 
+}
+
+void READ_RFID1()
+{
+  SPI.begin(); // Init SPI bus
+  rfid1.PCD_Init(); // Init MFRC522
+    
+  if ( ! rfid1.PICC_IsNewCardPresent()) 
+  {
+  return;
+  }
+  if ( ! rfid1.PICC_ReadCardSerial()) 
+  {
+  return;
+  }
+  Serial.println("READER 2: ");
+  for (byte i = 0; i < rfid1.uid.size; i++)
+  {
+    //Serial.print(rfid1.uid.uidByte[ii], HEX);
+    UID_B[i] = rfid1.uid.uidByte[i];
+  }
+  byte UID_SIZE = sizeof(UID_B);
+  memset(UID_C, 0, sizeof(UID_SIZE));
+  //COVERT BYTE TO CHAR
+  for (int y = 0; y < UID_SIZE; y++)
+  {
+    // convert byte to its ascii representation
+    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
+  }
+  digitalWrite(BUZZER, HIGH);
+  delay(50);
+  digitalWrite(BUZZER, LOW);
+  Serial.println(UID_C);
+  Serial.println("");
+  rfid1.PICC_HaltA();
+  rfid1.PCD_StopCrypto1();  
+  SPI.end();
+}
 // CHECK FINGER
 uint8_t getFingerprintID() 
 {
@@ -682,7 +777,6 @@ uint8_t getFingerprintID()
   // found a match!
   Serial.print("Found ID #"); Serial.print(finger.fingerID);
   Serial.print(" with confidence of "); Serial.println(finger.confidence);
-
   return finger.fingerID;
 }
 
@@ -702,77 +796,6 @@ int getFingerprintIDez()
   Serial.print("Found ID #"); Serial.print(finger.fingerID);
   Serial.print(" with confidence of "); Serial.println(finger.confidence);
   return finger.fingerID;
-}
-
-void READ_RFID()
-{
-  SPI.begin(); // Init SPI bus
-  mfrc522.PCD_Init(); // Init MFRC522  
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-  {
-    return;
-  }
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) 
-  {
-    return;
-  }
-  Serial.println("ID thẻ: ");
-  for (byte i = 0; i < mfrc522.uid.size; i++)
-  {
-    //Serial.print(mfrc522.uid.uidByte[i], HEX);
-    UID_B[i] = mfrc522.uid.uidByte[i];
-  }
-  byte UID_SIZE = sizeof(UID_B);
-  memset(UID_C, 0, sizeof(UID_SIZE));
-
-  //COVERT BYTE TO CHAR
-  for (int y = 0; y < UID_SIZE; y++)
-  {
-    // convert byte to its ascii representation
-    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
-  }
-  Serial.println(UID_C);
-  Serial.println("");
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1(); 
-  SPI.end(); 
-}
-
-void RFID1()
-{
-  SPI.begin(); // Init SPI bus
-  rfid1.PCD_Init(); // Init MFRC522
-    
-  if ( ! rfid1.PICC_IsNewCardPresent()) 
-  {
-  return;
-  }
-  if ( ! rfid1.PICC_ReadCardSerial()) 
-  {
-  return;
-  }
-  Serial.println("READER 2: ");
-  for (byte i = 0; i < rfid1.uid.size; i++)
-  {
-    //Serial.print(rfid1.uid.uidByte[ii], HEX);
-    UID_B[i] = rfid1.uid.uidByte[i];
-  }
-  byte UID_SIZE = sizeof(UID_B);
-  memset(UID_C, 0, sizeof(UID_SIZE));
-  //COVERT BYTE TO CHAR
-  for (int y = 0; y < UID_SIZE; y++)
-  {
-    // convert byte to its ascii representation
-    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
-  }
-  Serial.println(UID_C);
-  Serial.println("");
-  rfid1.PICC_HaltA();
-  rfid1.PCD_StopCrypto1();
-   
-  SPI.end();
 }
 
 //ADD FINGER
@@ -944,40 +967,22 @@ uint8_t deleteFingerprint(uint8_t id)
 void GET_TIME()
 {
   DateTime now = rtc.now();
-  Serial.print(now.year(), DEC);
-  Serial.print('/');
-  Serial.print(now.month(), DEC);
-  Serial.print('/');
-  Serial.print(now.day(), DEC);
-  Serial.print(" (");
-  Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-  Serial.print(") ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(':');
-  Serial.print(now.minute(), DEC);
-  Serial.print(':');
-  Serial.print(now.second(), DEC);
-  Serial.println();
-  sprintf(TIME,"%d:%d:%d %d/%d/%d", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+  sprintf(TIME_D,"%02d/%02d/%02d", now.day(), now.month(),now.year() );
   sprintf(TIME_H,"%02d:%02d:%02d", now.hour(), now.minute(), now.second());
-  sprintf(TIME_D,"%02d/%02d/%04d", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());  
-  //Serial.println(TIME);
-  //text_state.setText(TIME);  
+  sprintf(TIME_ALL,"TIME: %02d:%02d:%02d %02d/%02d/%04d ", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
+  Serial.println(TIME_ALL);
+  Serial.println(TIME_H);
+  Serial.println(TIME_D); 
 }
 void SEND_DATA_STORED()
 {
   HTTPClient http;
   http.begin(serverName);
   GET_TIME();
-  String POS = "worker";
-  String RFID = "abcdrf4";
-  String NAME = "sinh pham";
-  String GMAIL = "sinhpham@gmail.com";
-  String PASS = "pass1234";
   
   String dataPost = String("{\"ID\":\" ") + ID_STORED + String("\",\"RFID\":\" ") + UID_C + String("\",\"NAME\":\" ") 
   + textname_p4c + String("\",\"Position\":\" ") + textpos_p4c + String("\",\"GMAIL\":\" ") + textgmail_p4c + String("\",\"PASS\":\" ") 
-  + textpass_p4c + String("\",\"TIME\":\" ") + TIME + String("\" }");
+  + textpass_p4c + String("\" }");
   
   http.addHeader("Content-Type", "application/json");
   // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
@@ -989,25 +994,49 @@ void SEND_DATA_STORED()
 
 void SEND_DATA_CHECK()
 {
-  HTTPClient http;
-  http.begin(serverName);
+//  HTTPClient http;
+//  http.begin(serverName);
   GET_TIME();
-  String POS = "worker";
-  String RFID = "abcdrf4";
-  String NAME = "sinh pham";
-  String GMAIL = "sinhpham@gmail.com";
-  String PASS = "pass1234";
+  if(ENA_CHECKIN == 1)
+  {
+    HTTPClient http;
+    http.begin(serverName);
+      String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
+    + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }");
+    
+    http.addHeader("Content-Type", "application/json");
+    int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    http.end();
+    ENA_CHECKIN=0;
+    select_checkin_p2.setValue(0);
+  }
+  if(ENA_CHECKOUT == 1)
+  {
+    HTTPClient http;
+    http.begin(serverName);
+    String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckOutTime\":\" ") 
+    + TIME_H + String("\",\"CheckOutDay\":\" ") + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }"); 
+    
+    http.addHeader("Content-Type", "application/json");
+    int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    http.end();   
+    ENA_CHECKOUT=0;
+    select_checkout_p2.setValue(0);
+  }
+     
+//  String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
+//  + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"CheckOutTime\":\" ") + TIME_H + String("\",\"CheckOutDay\":\" ") 
+//  + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }");
   
-  String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
-  + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"CheckOutTime\":\" ") + TIME_H + String("\",\"CheckOutDay\":\" ") 
-  + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }");
-  
-  http.addHeader("Content-Type", "application/json");
-  // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
-  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
-  http.end(); 
+//  http.addHeader("Content-Type", "application/json");
+//  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
+//  Serial.print("HTTP Response code: ");
+//  Serial.println(httpResponseCode);
+//  http.end(); 
 }
 
 void SEND_DATA_SETTEMP()
@@ -1026,7 +1055,7 @@ void SEND_DATA_SETTEMP()
   http.end(); 
 }
 
-void LAY_DATA()
+void GET_DATA()
 {
   HTTPClient http;
   http.begin(serverName);

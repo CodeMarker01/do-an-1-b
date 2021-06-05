@@ -39,7 +39,7 @@ uint8_t id;
 void setup()
 {
   Serial.begin(9600);
-  Serial2.begin(115200);
+  //Serial2.begin(115200);
   while (!Serial);  // For Yun/Leo/Micro/Zero/...
   delay(100);
   Serial.println("\n\nAdafruit Fingerprint sensor enrollment");
