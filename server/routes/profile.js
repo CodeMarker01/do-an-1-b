@@ -27,16 +27,15 @@ router.post(
   check("skills", "Skills is required").notEmpty(),
   createOrUpdateUserProfile
 );
-u;
 // @route    POST api/profile/user/check-in-out-by-userid
 // @desc     Create or update user profile
 // @access   Public (test)
 //"checkInTime":"2018-12-30T05:59:00"
-router.post("/profile/user/check-in-out", async (req, res) => {
-  const { checkInTime, checkOutTime, checkOutCode } = req.body;
+router.post("/profile/user/check-in-out", authCheck, async (req, res) => {
+  const { checkInTime, checkOutTime } = req.body;
   const checkInTimeDate = new Date(checkInTime);
   const checkOutTimeDate = new Date(checkOutTime);
-  const diffTime = Math.abs(cheuckOutTimeDate - checkInTimeDate) / 3600000;
+  const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
 
   try {
     const profile = await Profile.findOneAndUpdate(

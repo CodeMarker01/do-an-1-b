@@ -44,7 +44,7 @@ exports.createUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password } = req.body;
+  const { name, email, password, rfid, fingerprint } = req.body;
 
   try {
     //* See if user exists
@@ -68,6 +68,8 @@ exports.createUser = async (req, res) => {
       email,
       avatar,
       password,
+      rfid,
+      fingerprint,
     });
 
     //* Encrypt password
@@ -89,11 +91,12 @@ exports.createUser = async (req, res) => {
       { expiresIn: "5 days" },
       (err, token) => {
         if (err) throw err;
+        console.log("User Created Successful!");
         res.json({ token, name });
       }
     );
   } catch (err) {
-    console.error(err.message);
+    console.log(err.message);
     res.status(500).send("Server error");
   }
 };
