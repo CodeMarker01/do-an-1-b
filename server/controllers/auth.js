@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const normalize = require("normalize-url");
 
 const User = require("../models/user");
+const Profile = require("../models/Profile");
 
 // exports.CreateUser = async (req, res) => {
 //   console.log("REQ USER", req.user);
@@ -151,8 +152,8 @@ exports.signInUser = async (req, res) => {
   }
 };
 
-exports.createOrUpdateUser = (req, res) => {
-  res.json({
-    data: "hey you hit create-or-update-user API endpoint",
-  });
-};
+// exports.createOrUpdateUser = (req, res) => {
+//   res.json({
+//     data: "hey you hit create-or-update-user API endpoint",
+//   });
+// };

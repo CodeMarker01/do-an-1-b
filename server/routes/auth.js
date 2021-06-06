@@ -34,11 +34,26 @@ router.post(
 // @route    GET api/auth
 // @desc     Get user by token
 // @access   Private
+// @desc     Yes
 router.get("/auth", authCheck, getUserByToken);
+
+// @route    POST api/update-users
+// @desc     Check emai & pass -> return token
+// @access   Public
+// @usage    Yes
+router.post(
+  "/update-users",
+  [
+    check("email", "Please include a valid email").isEmail(),
+    check("password", "Password is required").exists(),
+  ],
+  signInUser
+);
 
 // @route    POST api/auth
 // @desc     Check emai & pass -> return token
 // @access   Public
+// @usage    No
 router.post(
   "/auth",
   [
@@ -49,7 +64,7 @@ router.post(
 );
 
 //import
-const { createOrUpdateUser } = require("../controllers/auth");
-router.get("/create-user", createOrUpdateUser);
+// const { createOrUpdateUser } = require("../controllers/auth");
+// router.get("/create-user", createOrUpdateUser);
 
 module.exports = router;

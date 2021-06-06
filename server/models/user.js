@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema(
     CheckInDate: String,
     CheckOutTime: String,
     CheckOutDate: String,
+    salary: {
+      type: Number,
+      default: 1000000,
+    },
+    coeffSalary: {
+      type: Number,
+      default: 0,
+    },
     testTime: {
       type: Date,
     },
