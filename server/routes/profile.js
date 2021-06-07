@@ -12,6 +12,7 @@ const {
 const { authCheck } = require("../middlewares/auth");
 const Profile = require("../models/Profile");
 const User = require("../models/user");
+const { isValidDate } = require("../utils");
 
 // @route    GET api/profile/me
 // @desc     Get current users profile
@@ -34,26 +35,61 @@ router.post(
 //"checkInTime":"2018-12-30T05:59:00"
 router.post("/profile/user/check-in-out", async (req, res) => {
   const { checkInTime, checkOutTime, checkOutCode } = req.body;
-  const checkInTimeDate = new Date(checkInTime);
-  const checkOutTimeDate = new Date(checkOutTime);
-  const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
+
+  //build object checkIn checkOut
+  const ObjCheckInOutUpdate = {};
+  if (checkInTime && isValidDate(checkInTime)) {
+    // const checkInTimeDate = new Date(checkInTime);
+    ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
+  }
+  if (checkOutTime && isValidDate(checkOutTime)) {
+    // const checkOutTimeDate = new Date(checkOutTime);
+    ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
+  }
+  if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
+    ObjCheckInOutUpdate.workingTime =
+      Math.abs(
+        ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
+      ) / 3600000;
+    //   const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
+  }
+  // check checkOutCode is valid for ObjectId, if not create ObjectId format for exceptioin
   const ObjectId = require("mongoose").Types.ObjectId;
-  //   const checkOutCodeToObjectId = checkOutCode.replace(/-/g, "");
-  let objId = "123456789012";
+  let checkOutCodeIdValid = "123456789012";
   if (ObjectId.isValid(checkOutCode)) {
-    objId = ObjectId(
-      checkOutCodeToObjectId.length < 12
-        ? "123456789012"
-        : checkOutCodeToObjectId
+    checkOutCodeIdValid = ObjectId(
+      checkOutCode.length < 12 ? "123456789012" : checkOutCode
     );
   }
-  //   const objIdValidate = ObjectId.isValid(objId) ? objIdj : "123456789012";
-  console.log("checkoutcode-->", checkOutCode);
-  console.log("Object Id checkout-->", objId);
+  console.log("Object Id checkout-->", checkOutCodeIdValid);
+  console.log("ObjCheckInOutUpdate", ObjCheckInOutUpdate);
   // You should make string 'param' as ObjectId type. To avoid exception,
   // the 'param' must consist of more than 12 characters.
 
   try {
+    const findPreviousCheck = await User.findOne({
+      $or: [
+        { _id: checkOutCodeIdValid },
+        { rfid: checkOutCode },
+        { fingerprint: checkOutCode },
+      ],
+    }).exec();
+    console.log(
+      "🚀 ~ file: profile.js ~ line 82 ~ router.post ~ findPreviousCheck",
+      findPreviousCheck
+    );
+    const { checkInTime, checkOutTime } = findPreviousCheck;
+    if (!ObjCheckInOutUpdate.checkInTime) {
+      ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
+    }
+    if (!ObjCheckInOutUpdate.checkOutTime) {
+      ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
+    }
+    ObjCheckInOutUpdate.workingTime =
+      Math.abs(
+        ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
+      ) / 3600000;
+
     const profile = await User.findOneAndUpdate(
       {
         // $or: [
@@ -62,17 +98,15 @@ router.post("/profile/user/check-in-out", async (req, res) => {
         //   { fingerprint: req.fingerprint },
         // ],
         $or: [
-          { _id: objId },
+          { _id: checkOutCodeIdValid },
           { rfid: checkOutCode },
           { fingerprint: checkOutCode },
         ],
       },
-      {
-        checkInTime: checkInTimeDate,
-        checkOutTime: checkOutTimeDate,
-        workingTime: diffTime,
-      },
-      { new: true }
+
+      ObjCheckInOutUpdate,
+
+      { new: true, upsert: true }
     ).exec();
     console.log({ profile });
     if (!profile) {

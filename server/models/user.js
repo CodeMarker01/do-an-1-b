@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
     CheckInDate: String,
     checkOutTime: String,
     CheckOutDate: String,
+    workingTime: String,
     salary: {
       type: Number,
       default: 1000000,
