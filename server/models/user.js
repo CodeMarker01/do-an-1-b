@@ -27,9 +27,9 @@ const userSchema = new mongoose.Schema(
     },
     rfid: String,
     fingerprint: String,
-    CheckInTime: String,
+    checkInTime: String,
     CheckInDate: String,
-    CheckOutTime: String,
+    checkOutTime: String,
     CheckOutDate: String,
     salary: {
       type: Number,

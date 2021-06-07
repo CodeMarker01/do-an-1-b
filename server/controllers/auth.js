@@ -44,7 +44,19 @@ exports.createUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password, rfid, fingerprint } = req.body;
+  const {
+    name,
+    email,
+    password,
+    rfid,
+    fingerprint,
+    checkInTime,
+    checkOutTime,
+  } = req.body;
+
+  const checkInTimeInit = checkInTime ? checkInTime : "not-set";
+  const checkOutTimeInit = checkOutTime ? checkOutTime : "not-set";
+  const workingTime = "not-set";
 
   try {
     //* See if user exists
@@ -70,6 +82,9 @@ exports.createUser = async (req, res) => {
       password,
       rfid,
       fingerprint,
+      checkInTime: checkInTimeInit,
+      checkOutTime: checkOutTimeInit,
+      workingTime,
     });
 
     //* Encrypt password

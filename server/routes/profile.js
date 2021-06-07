@@ -11,6 +11,7 @@ const {
 
 const { authCheck } = require("../middlewares/auth");
 const Profile = require("../models/Profile");
+const User = require("../models/user");
 
 // @route    GET api/profile/me
 // @desc     Get current users profile
@@ -31,19 +32,39 @@ router.post(
 // @desc     Create or update user profile
 // @access   Public (test)
 //"checkInTime":"2018-12-30T05:59:00"
-router.post("/profile/user/check-in-out", authCheck, async (req, res) => {
-  const { checkInTime, checkOutTime } = req.body;
+router.post("/profile/user/check-in-out", async (req, res) => {
+  const { checkInTime, checkOutTime, checkOutCode } = req.body;
   const checkInTimeDate = new Date(checkInTime);
   const checkOutTimeDate = new Date(checkOutTime);
   const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
+  const ObjectId = require("mongoose").Types.ObjectId;
+  //   const checkOutCodeToObjectId = checkOutCode.replace(/-/g, "");
+  let objId = "123456789012";
+  if (ObjectId.isValid(checkOutCode)) {
+    objId = ObjectId(
+      checkOutCodeToObjectId.length < 12
+        ? "123456789012"
+        : checkOutCodeToObjectId
+    );
+  }
+  //   const objIdValidate = ObjectId.isValid(objId) ? objIdj : "123456789012";
+  console.log("checkoutcode-->", checkOutCode);
+  console.log("Object Id checkout-->", objId);
+  // You should make string 'param' as ObjectId type. To avoid exception,
+  // the 'param' must consist of more than 12 characters.
 
   try {
-    const profile = await Profile.findOneAndUpdate(
+    const profile = await User.findOneAndUpdate(
       {
+        // $or: [
+        //   { user: req.user.id },
+        //   { rfid: req.rfid },
+        //   { fingerprint: req.fingerprint },
+        // ],
         $or: [
-          { user: req.user.id },
-          { rfid: req.rfid },
-          { fingerprint: req.fingerprint },
+          { _id: objId },
+          { rfid: checkOutCode },
+          { fingerprint: checkOutCode },
         ],
       },
       {
@@ -51,9 +72,12 @@ router.post("/profile/user/check-in-out", authCheck, async (req, res) => {
         checkOutTime: checkOutTimeDate,
         workingTime: diffTime,
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { new: true }
     ).exec();
     console.log({ profile });
+    if (!profile) {
+      return res.status(404).send("Profile Not Found");
+    }
     return res.json({ profile });
   } catch (err) {
     console.error(err.message);
