@@ -25,11 +25,23 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    rfid: String,
-    fingerprint: String,
-    checkInTime: String,
+    rfid: {
+      type: String,
+      default: "not-set",
+    },
+    fingerprint: {
+      type: String,
+      default: "not-set",
+    },
+    checkInTime: {
+      type: String,
+      default: "not-set",
+    },
     CheckInDate: String,
-    checkOutTime: String,
+    checkOutTime: {
+      type: String,
+      default: "not-set",
+    },
     CheckOutDate: String,
     workingTime: String,
     salary: {
