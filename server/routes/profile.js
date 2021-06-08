@@ -29,6 +29,7 @@ router.post(
   check("skills", "Skills is required").notEmpty(),
   createOrUpdateUserProfile
 );
+
 // @route    POST api/profile/user/check-in-out-by-userid
 // @desc     Create or update user profile
 // @access   Public (test)
