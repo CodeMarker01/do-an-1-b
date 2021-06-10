@@ -6,6 +6,7 @@ const normalize = require("normalize-url");
 
 const User = require("../models/user");
 const Profile = require("../models/Profile");
+const RfidOpenDoor = require("../models/rfidOpenDoor");
 
 // exports.CreateUser = async (req, res) => {
 //   console.log("REQ USER", req.user);
@@ -92,6 +93,15 @@ exports.createUser = async (req, res) => {
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
+
+    // add rfid to rfidOpenDoor for open door
+    const rfidOpenDoor = new RfidOpenDoor({
+      user: user._id,
+      rfid,
+      role: "Employee",
+    });
+    await rfidOpenDoor.save();
+    console.log("save db in rfidOpenDoor", rfidOpenDoor);
 
     const payload = {
       user: {
