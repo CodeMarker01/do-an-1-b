@@ -18,6 +18,10 @@ router.post("/user/open-door", async (req, res) => {
     if (!rfid) return res.status(400).json({ msg: "RFID not found" });
 
     // check if user === guest
+    /**
+     * if role === "Guest", expire card in 1 minute
+     * if role === "Employee", do not expire card
+     */
     if (rfidUser.role === "Guest") {
       rfidUser.checkOutTimeOpenDoor = Date.now();
       const expireCard = Math.abs(
