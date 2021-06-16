@@ -3,3 +3,18 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.container {
+  display: flex;
+  margin-top: 10px;
+  /* background-color: mediumturquoise; */
+}
+
+.link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.others {
+  flex: 4;
+}
