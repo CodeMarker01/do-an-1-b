@@ -107,12 +107,16 @@ NexPage page6 = NexPage(6,0,"set_temp");
 //KHAI BAO BIEN SU DUNG
 int  ID_CHECK, ID_STORED, ID_DEL;
 uint32_t   ENA_CHECKIN, ENA_CHECKOUT;
-char ID_CHECK_C[20], ID_STORED_C[20], ID_DEL_C[20], ID_DEL_C2[20];
-char TIME_ALL[30], TIME_D[15], TIME_H[10];
-byte UID_B[4];
-char UID_C[15];
+char ID_CHECK_C[20], ID_STORED_C[20], ID_DEL_C[20], ID_DEL_C2[20], NAME_RESPOND_C[20], Respond_DataCreateUser_C[20], Respond_DataCreateDoor_C[20];
+String NAME_RESPOND_S = {};
+String ENABLE_DOOR = {};
+char TIME_ALL[30], TIME[25];
+byte UID_B[4], UIDC_B[4];
+byte moc;
+char UID_C[8], UIDC_C[8]; //15
 
-long previousMillis = 0;
+
+long previousMillis = 0; 
 char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textusern_p4c[20], textpass_p4c[20], textpass2_p4c[20];
 char textpos_psettempc[20], textdur_psettempc[20];
 char pass_pkrfidselc[12], pass_pkpassadc[8];
@@ -120,9 +124,13 @@ char pass_pdelallc[8];
 
 //KHAI BAO WIFI
 const char *ssid = "TANG 2 - 2";
+//const char *ssid = "@@";
 const char *password = "0936120886";
-//const char *serverName = "http://192.168.0.116:8000/update-sensor"; // WIFI TANG 2-1
-const char *serverName = "http://192.168.0.111:8000/update-sensor";  //WIFI TANG 2-2 createUser
+const char *serverCreateUser = "http://192.168.0.103:8000/api/create-users";
+const char *serverCreateDoor = "http://192.168.0.103:8000/api/user/create-guest";
+const char *serverCheckUser = "http://192.168.0.103:8000/api/profile/user/check-in-out";  
+const char *serverCheckDoor = "http://192.168.0.103:8000/api/user/open-door";
+
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
@@ -133,7 +141,7 @@ int n = 0;
 int humiTest = 321;
 int tempTest = 100;
 double sensorReadingsArr[5];
-String httpGETRequest(const char *serverName);
+
 
 //KHAI BAO DOI TUONG CHAM
 NexTouch *nex_listen_list[] = 
@@ -182,7 +190,7 @@ void button_user_p1_PopCallback(void *ptr)
 }
 void bfingp2PopCallback(void *ptr) //CHECK ID
 {
-  text_time_p0.setText("hi sinh");
+//  text_time_p0.setText("hi sinh");
   Serial.println("R305");
   digitalWrite(BUZZER, HIGH);
   delay(50);
@@ -195,20 +203,28 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
     ID_CHECK = finger.fingerID;
     sprintf(ID_CHECK_C, "ID LA %d", ID_CHECK);
     //CHECK ID -> LAY NAME
-
   } 
-  if( (ID_CHECK == 65406) || (ID_CHECK == 0)) 
+    for(int u=0;u<sizeof(ID_CHECK_C);u++)
+    {
+      Serial.println(ID_CHECK_C[u]);
+    }
+  if((ID_CHECK == 65406) && (ID_CHECK == 0))
   {
     text_infor_p2.setText("ID ERROR");  //SAI --> THIEU K NHAP
     delay(1000);
   }
   else 
-  {
-    text_infor_p2.setText(ID_CHECK_C); 
-    SEND_DATA_CHECK();
+  { 
+    SEND_DATA_CHECK();  
+    //text_infor_p2.setText(ID_CHECK_C);
+    text_infor_p2.setText(NAME_RESPOND_C);
+    Serial.println("++++++++++++++");
+    Serial.println(NAME_RESPOND_C);
+    delay(2000);
   }
-  ID_CHECK = 0;
-  text_infor_p2.setText(NULL);
+  
+  memset(NAME_RESPOND_C, NULL, 20);
+  //text_infor_p2.setText(NULL);
   text_state_p2.setText("SELECT MODE");
   page1.show();
   
@@ -233,7 +249,7 @@ void button_pkrfidsel_PopCallback(void *ptr)
     } 
     text_infor_p2.setText(NULL);
     SEND_DATA_CHECK();
-    memset(UID_C, 0, 15);  
+    memset(UID_C, 0, 8);  
     text_state_p2.setText("SELECT MODE");
     page1.show();
   }
@@ -290,8 +306,8 @@ void brfidp4_PopCallback(void *ptr)
   {
      READ_RFID();
      text_rfid_p4.setText("ENTER YOUR TAG RFID");
-     text_rfid_p4.setText(UID_C); // NẰM NGOÀI HAY TRONG ?
   } 
+  text_rfid_p4.setText(UID_C); // NẰM NGOÀI HAY TRONG ?
                           
 }
 void bnamep5_PopCallback(void *ptr) 
@@ -371,7 +387,7 @@ void bexitp4_PopCallback(void *ptr)
 {
   //DELETE DATA STRING
   memset(ID_STORED_C, NULL, 20);
-  memset(UID_C, NULL, 15);
+  memset(UID_C, NULL, 8);
   memset(textname_p4c, NULL, 20);
   memset(textpos_p4c, NULL, 20);
   memset(textgmail_p4c, NULL, 20);
@@ -391,17 +407,23 @@ void bexitp4_PopCallback(void *ptr)
 }
 void bdonep4_PopCallback(void *ptr)
 {
+  Serial.println("----------rfid--------------");
+  Serial.println(UID_C);
   SEND_DATA_STORED();
-  
+  SEND_DATA_CREATEDOOR();
+  Serial.println(String(Respond_DataCreateUser_C));
+  Serial.println(String(Respond_DataCreateDoor_C));
   //DELETE DATA STRING
   memset(ID_STORED_C, NULL, 20);
-  memset(UID_C, NULL, 15);
+  memset(UID_C, NULL, 8);
   memset(textname_p4c, NULL, 20);
   memset(textpos_p4c, NULL, 20);
   memset(textgmail_p4c, NULL, 20);
   memset(textusern_p4c, NULL, 20);
   memset(textpass_p4c, NULL, 20);
   memset(textpass2_p4c, NULL, 20);
+  memset(Respond_DataCreateUser_C, NULL, 20);
+  memset(Respond_DataCreateDoor_C, NULL, 20);
   //DELETE DATA HMI
   text_fing_p4.setText(NULL);
   text_rfid_p4.setText(NULL);
@@ -491,7 +513,7 @@ void bdur_pkeytemp_PopCallback(void *ptr)
 }
 void bexit_pkeytemp_PopCallback(void *ptr)
 {
-  memset(UID_C, NULL, 15);
+  memset(UID_C, NULL, 8);
   memset(textpos_psettempc, NULL, 20);
   memset(textdur_psettempc, NULL, 20);
 
@@ -502,12 +524,13 @@ void bexit_pkeytemp_PopCallback(void *ptr)
 }
 void bdone_pkeytemp_PopCallback(void *ptr)
 {
-  SEND_DATA_SETTEMP();
-  
-  memset(UID_C, NULL, 15);
+  SEND_DATA_CREATEDOOR();
+  Serial.println(Respond_DataCreateDoor_C);
+  memset(UID_C, NULL, 8);
   memset(textpos_psettempc, NULL, 20);
   memset(textdur_psettempc, NULL, 20);
-
+  memset(Respond_DataCreateDoor_C, NULL, 20);
+  
   text_rfid_psettemp.setText(NULL);
   text_pos_psettemp.setText(NULL);
   text_dur_psettemp.setText(NULL);
@@ -608,32 +631,39 @@ void loop()
   }
   //else text_connect_p0.setText("CONNECT: OK");
 
-  //CHECK RFID TO OPEN DOOR
-  READ_RFID();
-  READ_RFID1(); 
-  // CHECK_UID: SEND DATA TO SERVER TO CHECK IT. IF OK SEND '1' FOR ESP32, ELSE  SEND '0'.
-  // IF(CHECK_UID == 1) ... ELSE ...
-
-  Serial.println(digitalRead(SENSOR_DOOR));
+  //CHECK RFID TO OPEN DOOR 
+  READ_RFID1();
+  READ_RFID2(); 
+  if (String(UIDC_C) == NULL)
+  {
+    Serial.println("NO CARD");  
+  }
+  else
+  {
+    SEND_DATA_CHECKDOOR();
+    memset(UIDC_C, NULL, 8);
+    Serial.println("HAVE CARD"); 
+  }
+  
   if(digitalRead(SENSOR_DOOR) == 0)   //CB DONG:0 - MO: 1
   {
     digitalWrite(RELAY, HIGH); //CLOSE
     Serial.println("CLOSE DOOR");
   }
-  if( (String(UID_C) == "A9A1EF6E"))
+  if( ENABLE_DOOR == "1" )
   {
     digitalWrite(RELAY, LOW); //OPEN
     Serial.println("OPEN DOOR");
-    memset(UID_C, NULL, 15);
+    ENABLE_DOOR = "0";
   }
-
+  
   // LOOP NEXTION
   nexLoop(nex_listen_list);
   if(millis() - previousMillis >= 1000)
   {
      previousMillis = millis();
      GET_TIME();
-     text_time_p0.setText(TIME_ALL);
+     //text_time_p0.setText(TIME_ALL);
   }
 } 
 
@@ -651,14 +681,14 @@ void READ_RFID()
   {
     return;
   }
-  Serial.println("ID thẻ: ");
+  Serial.println("ID CHECK: ");
   for (byte i = 0; i < mfrc522.uid.size; i++)
   {
     //Serial.print(mfrc522.uid.uidByte[i], HEX);
     UID_B[i] = mfrc522.uid.uidByte[i];
   }
   byte UID_SIZE = sizeof(UID_B);
-  memset(UID_C, 0, sizeof(UID_SIZE));
+  //memset(UID_C, 0, sizeof(UID_SIZE));
 
   //COVERT BYTE TO CHAR
   for (int y = 0; y < UID_SIZE; y++)
@@ -679,6 +709,45 @@ void READ_RFID()
 void READ_RFID1()
 {
   SPI.begin(); // Init SPI bus
+  mfrc522.PCD_Init(); // Init MFRC522  
+  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  Serial.println("READER 1: ");
+  for (byte i = 0; i < mfrc522.uid.size; i++)
+  {
+    //Serial.print(mfrc522.uid.uidByte[i], HEX);
+    UIDC_B[i] = mfrc522.uid.uidByte[i];
+  }
+  byte UIDC_SIZE = sizeof(UIDC_B);
+  memset(UIDC_C, NULL, sizeof(UIDC_SIZE));
+
+  //COVERT BYTE TO CHAR
+  for (int y = 0; y < UIDC_SIZE; y++)
+  {
+    // convert byte to its ascii representation
+    sprintf(&UIDC_C[y * 2], "%02X", UIDC_B[y]);
+  }
+  digitalWrite(BUZZER, HIGH);
+  delay(50);
+  digitalWrite(BUZZER, LOW);
+  Serial.println(UIDC_C);
+  Serial.println("");
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1(); 
+  SPI.end(); 
+}
+
+void READ_RFID2()
+{
+  SPI.begin(); // Init SPI bus
   rfid1.PCD_Init(); // Init MFRC522
     
   if ( ! rfid1.PICC_IsNewCardPresent()) 
@@ -693,20 +762,20 @@ void READ_RFID1()
   for (byte i = 0; i < rfid1.uid.size; i++)
   {
     //Serial.print(rfid1.uid.uidByte[ii], HEX);
-    UID_B[i] = rfid1.uid.uidByte[i];
+    UIDC_B[i] = rfid1.uid.uidByte[i];
   }
-  byte UID_SIZE = sizeof(UID_B);
-  memset(UID_C, 0, sizeof(UID_SIZE));
+  byte UIDC_SIZE = sizeof(UIDC_B);
+  memset(UIDC_C, NULL, sizeof(UIDC_SIZE));
   //COVERT BYTE TO CHAR
-  for (int y = 0; y < UID_SIZE; y++)
+  for (int y = 0; y < UIDC_SIZE; y++)
   {
     // convert byte to its ascii representation
-    sprintf(&UID_C[y * 2], "%02X", UID_B[y]);
+    sprintf(&UIDC_C[y * 2], "%02X", UIDC_B[y]);
   }
   digitalWrite(BUZZER, HIGH);
   delay(50);
   digitalWrite(BUZZER, LOW);
-  Serial.println(UID_C);
+  Serial.println(UIDC_C);
   Serial.println("");
   rfid1.PICC_HaltA();
   rfid1.PCD_StopCrypto1();  
@@ -967,134 +1036,204 @@ uint8_t deleteFingerprint(uint8_t id)
 void GET_TIME()
 {
   DateTime now = rtc.now();
-  sprintf(TIME_D,"%02d/%02d/%02d", now.day(), now.month(),now.year() );
-  sprintf(TIME_H,"%02d:%02d:%02d", now.hour(), now.minute(), now.second());
+  sprintf(TIME,"%04d-%02d-%02dT%02d:%02d:%02d",now.year(),now.month(), now.day(),now.hour(),now.minute(),now.second());
   sprintf(TIME_ALL,"TIME: %02d:%02d:%02d %02d/%02d/%04d ", now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year());
-  Serial.println(TIME_ALL);
-  Serial.println(TIME_H);
-  Serial.println(TIME_D); 
+//  Serial.println(TIME_ALL);
+//  Serial.println(TIME); 
 }
+
 void SEND_DATA_STORED()
 {
   HTTPClient http;
-  http.begin(serverName);
+  http.begin(serverCreateUser);
   GET_TIME();
   
-  String dataPost = String("{\"ID\":\" ") + ID_STORED + String("\",\"RFID\":\" ") + UID_C + String("\",\"NAME\":\" ") 
-  + textname_p4c + String("\",\"Position\":\" ") + textpos_p4c + String("\",\"GMAIL\":\" ") + textgmail_p4c + String("\",\"PASS\":\" ") 
-  + textpass_p4c + String("\" }");
-  
+  String dataCreateUser = String("{\"fingerprint\":\"") + ID_STORED + String("\",\"rfid\":\"") + UID_C + String("\",\"name\":\"") 
+  + textname_p4c + String("\",\"Position\":\"") + textpos_p4c + String("\",\"email\":\"") + textgmail_p4c + String("\",\"password\":\"") 
+  + textpass_p4c + String("\" }"); 
   http.addHeader("Content-Type", "application/json");
-  // int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":24.25,\"value2\":\"49.54\",\"value3\": humiTest }");
-  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
+  int httpResponse_CreateUser = http.POST(dataCreateUser); 
+  if (httpResponse_CreateUser == 200) //GET DATA
+  {
+    Respond_DataCreateUser_C == "SUCCESS";
+    Serial.print("HTTP Response Create User: ");
+    Serial.println(httpResponse_CreateUser);
+  }
+  else
+  {
+    Respond_DataCreateUser_C == "ERROR";
+    Serial.print("Error: ");
+    Serial.println(httpResponse_CreateUser);
+  }
+  
   http.end(); 
 }
 
 void SEND_DATA_CHECK()
 {
-//  HTTPClient http;
-//  http.begin(serverName);
   GET_TIME();
-  if(ENA_CHECKIN == 1)
+  if( (ENA_CHECKIN == 1) && (ID_CHECK !=0))
   {
     HTTPClient http;
-    http.begin(serverName);
-      String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
-    + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }");
-    
+    http.begin(serverCheckUser);
+    String dataCheckIn = String("{\"checkOutCode\":\"") + ID_CHECK + String("\",\"RFID\":\"") + UID_C + String("\",\"checkInTime\":\"") 
+    + TIME + String("\",\"REQUEST\":\"") + pass_pkrfidselc + String("\" }");   
     http.addHeader("Content-Type", "application/json");
-    int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
+    int httpResponse_CheckIn = http.POST(dataCheckIn); // GUI DATA LEN SERVER  
+
+    String StringRecive_In = "{}"; 
+    if (httpResponse_CheckIn == 200) //GET DATA
+    {
+      Serial.print("HTTP Response code POST EMBEDDED: ");
+      Serial.println(httpResponse_CheckIn); //SEND DATA
+      StringRecive_In = http.getString();
+      Serial.println(StringRecive_In);  //GET RESPONDE
+
+      // -------------------------------------- PROCESS JSON -----------------------------------------------//
+    /* Guidline 
+     * Step1: GET OBJECT. Ex(JSONVar ObjectRecive_In = JSON.parse(StringRecive_In);)
+     * Step2: GET KEY. (Ex: JSONVar keys1 = ObjectRecive_In.keys();)
+     * Step3: GET VALUE KEY. (Ex: JSONVar valueKey1 = ObjectRecive_In[keys1[0]];)
+     */
+    JSONVar ObjectRecive_In = JSON.parse(StringRecive_In);  // STEP1
+    JSONVar keys1 = ObjectRecive_In.keys();                 // STEP2
+    JSONVar valueKey1 = ObjectRecive_In[keys1[0]];          // STEP3
+    JSONVar keys2 = valueKey1.keys();
+    JSONVar valueName = valueKey1[keys2[8]];
+    NAME_RESPOND_S = JSON.stringify(valueName); ///Convert the json to a String 
+
+    NAME_RESPOND_S.remove(0,1);   //REMOVE ""
+    for (int i = 0; i < NAME_RESPOND_S.length(); i++) 
+    {
+        if (NAME_RESPOND_S.charAt(i) == '"') 
+        {
+            moc = i; 
+        }
+    }
+    NAME_RESPOND_S.remove(moc,NAME_RESPOND_S.length()-moc); //vi tri, so luong
+    Serial.println(NAME_RESPOND_S);   
+    NAME_RESPOND_S.toCharArray(NAME_RESPOND_C, sizeof(NAME_RESPOND_S));
+    //sprintf(NAME_RESPOND_C, "%s --", NAME_RESPOND);
+    Serial.print("Name: ");
+    Serial.println(NAME_RESPOND_C);
+    }
+    else //ERROR
+    {
+      Serial.print("Error code POST EMBEDDED: ");
+      Serial.println(httpResponse_CheckIn);
+    }
+    
     http.end();
-    ENA_CHECKIN=0;
-    select_checkin_p2.setValue(0);
+    ID_CHECK = 0;
+//    ENA_CHECKIN=0;
+//    select_checkin_p2.setValue(0);
   }
-  if(ENA_CHECKOUT == 1)
+  
+  if(ENA_CHECKOUT == 1 && (ID_CHECK !=0))
   {
     HTTPClient http;
-    http.begin(serverName);
-    String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckOutTime\":\" ") 
-    + TIME_H + String("\",\"CheckOutDay\":\" ") + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }"); 
-    
+    http.begin(serverCheckUser);
+    String dataCheckOut = String("{\"checkOutCode\":\"") + ID_CHECK + String("\",\"RFID\":\"") + UID_C + String("\",\"checkOutTime\":\"") 
+    + TIME + String("\",\"REQUEST\":\"") + pass_pkrfidselc + String("\" }");   
     http.addHeader("Content-Type", "application/json");
-    int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
-    http.end();   
-    ENA_CHECKOUT=0;
-    select_checkout_p2.setValue(0);
+    Serial.println(dataCheckOut);
+    int httpResponse_CheckOut = http.POST(dataCheckOut); // GUI DATA LEN SERVER  
+
+    String StringRecive_Out = "{}"; 
+    if (httpResponse_CheckOut == 200) //GET DATA
+    {
+      Serial.print("HTTP Response code POST EMBEDDED: ");
+      Serial.println(httpResponse_CheckOut); //SEND DATA
+      StringRecive_Out = http.getString();
+      Serial.println(StringRecive_Out);  //GET RESPONDE
+
+      JSONVar ObjectRecive_Out = JSON.parse(StringRecive_Out);  // STEP1
+      JSONVar keys3 = ObjectRecive_Out.keys();                 // STEP2
+      JSONVar valueKey3 = ObjectRecive_Out[keys3[0]];          // STEP3
+      JSONVar keys4 = valueKey3.keys();
+      JSONVar valueName = valueKey3[keys4[8]];
+      NAME_RESPOND_S = JSON.stringify(valueName); ///Convert the json to a String 
+  
+      NAME_RESPOND_S.remove(0,1);   //REMOVE ""
+      for (int i = 0; i < NAME_RESPOND_S.length(); i++) 
+      {
+          if (NAME_RESPOND_S.charAt(i) == '"') 
+          {
+              moc = i; 
+          }
+      }
+      NAME_RESPOND_S.remove(moc,NAME_RESPOND_S.length()-moc); //vi tri, so luong
+      Serial.println(NAME_RESPOND_S);   
+      NAME_RESPOND_S.toCharArray(NAME_RESPOND_C, sizeof(NAME_RESPOND_S));
+      Serial.print("Name: ");
+      Serial.println(NAME_RESPOND_C); 
+    }
+    else //ERROR
+    {
+      Serial.print("Error code POST EMBEDDED: ");
+      Serial.println(httpResponse_CheckOut);
+    }  
+    http.end(); 
+    
+    ID_CHECK = 0; 
+//    ENA_CHECKOUT=0;
+//    select_checkout_p2.setValue(0);
   }
-     
-//  String dataPost = String("{\"ID\":\" ") + ID_CHECK + String("\",\"RFID\":\" ") + UID_C + String("\",\"CheckInTime\":\" ") 
-//  + TIME_H + String("\",\"CheckInDay\":\" ") + TIME_D + String("\",\"CheckOutTime\":\" ") + TIME_H + String("\",\"CheckOutDay\":\" ") 
-//  + TIME_D + String("\",\"REQUEST\":\" ") + pass_pkrfidselc + String("\" }");
-  
-//  http.addHeader("Content-Type", "application/json");
-//  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-//  Serial.print("HTTP Response code: ");
-//  Serial.println(httpResponseCode);
-//  http.end(); 
 }
 
-void SEND_DATA_SETTEMP()
+void SEND_DATA_CREATEDOOR()
 {
   HTTPClient http;
-  http.begin(serverName);
-  GET_TIME();
-   
-  String dataPost = String("{\"RFID\":\" ") + UID_C + String("\",\"PositionTemporary\":\" ") + textpos_psettempc + String("\",\"DurationTemporary\":\" ") 
-  + textdur_psettempc + String("\" }");
-  
+  http.begin(serverCreateDoor);   
+  String dataCreateDoor = String("{\"rfid\":\"") + UID_C + String("\",\"role\":\"") + textpos_psettempc + String("\",\"DurationTemporary\":\"") 
+  + textdur_psettempc + String("\"}"); 
   http.addHeader("Content-Type", "application/json");
-  int httpResponseCode = http.POST(dataPost); // GUI DATA LEN SERVER  
-  Serial.print("HTTP Response code: ");
-  Serial.println(httpResponseCode);
-  http.end(); 
-}
-
-void GET_DATA()
-{
-  HTTPClient http;
-  http.begin(serverName);
-//---------------------------------------------------------------------------------//
-  int httpResponseCodeGET = http.GET(); // LAY DATA TU SERVER
-  String payload = "{}"; // STORED DATA GET FROM SEVER 
-  if (httpResponseCodeGET > 0) //GET DATA
+  int httpResponseCreateDoor = http.POST(dataCreateDoor); // GUI DATA LEN SERVER  
+  if (httpResponseCreateDoor == 200) //GET DATA
   {
-    Serial.print("HTTP Response code GET: ");
-    Serial.println(httpResponseCodeGET);
-    payload = http.getString();
+    Respond_DataCreateDoor_C == "SUCCESS";
+    Serial.print("HTTP Response Create User: ");
+    Serial.println(httpResponseCreateDoor);
   }
   else
   {
-    Serial.print("Error code GET: ");
-    Serial.println(httpResponseCodeGET);
+    Respond_DataCreateDoor_C == "ERROR";
+    Serial.print("Error: ");
+    Serial.println(httpResponseCreateDoor);
   }
-// -------------------------------------------------------------------------------------//
-  JSONVar myObject = JSON.parse(payload); // JSON TO DISPLAY
-  // JSON.typeof(jsonVar) can be used to get the type of the var
-  if (JSON.typeof(myObject) == "undefined")
+  
+  http.end(); 
+}
+
+void SEND_DATA_CHECKDOOR()
+{
+  HTTPClient http;
+  http.begin(serverCheckDoor);
+   
+  String dataCheckDoor = String("{\"rfid\":\"") + UIDC_C + String("\",\"role\":\"") + textpos_psettempc + String("\"}"); 
+  http.addHeader("Content-Type", "application/json");
+  int httpResponse_CheckDoor = http.POST(dataCheckDoor); // GUI DATA LEN SERVER  
+
+  String StringRecive_CheckDoor = "{}"; 
+  if (httpResponse_CheckDoor == 200) //GET DATA
   {
-    Serial.println("Parsing input failed!");
-    return;
+    Serial.print("HTTP Response Check Door: ");
+    Serial.println(httpResponse_CheckDoor); //SEND DATA
+    StringRecive_CheckDoor = http.getString();
+    Serial.println(StringRecive_CheckDoor);  //GET RESPONDE
+
+    // -------------------------------------- PROCESS JSON -----------------------------------------------//
+    JSONVar ObjectRecive_CheckDoor = JSON.parse(StringRecive_CheckDoor);  // STEP1
+    JSONVar keysCheckDoor = ObjectRecive_CheckDoor.keys();                 // STEP2
+    JSONVar valueCheckDoor = ObjectRecive_CheckDoor[keysCheckDoor[2]];          // STEP3
+    ENABLE_DOOR = JSON.stringify(valueCheckDoor); ///Convert the json to a String 
+    Serial.print("ENABLE DOOR: ");
+    Serial.println(ENABLE_DOOR);
   }
-
-  Serial.print("JSON object = "); // CHUOI JSON CHUA TACH
-  Serial.println(myObject);
-
-  // myObject.keys() can be used to get an array of all the keys in the object
-  JSONVar keys = myObject.keys();
-  for (int i = 0; i < keys.length(); i++)
+  else //ERROR
   {
-    JSONVar value = myObject[keys[i]];
-    Serial.print(keys[i]);
-    Serial.print(" = ");
-    Serial.println(value);
-    sensorReadingsArr[i] = double(value);
+    Serial.print("Error code POST EMBEDDED: ");
+    Serial.println(httpResponse_CheckDoor);
   }
-
-  http.end();   
+  http.end(); 
 }
