@@ -62,6 +62,7 @@ router.post("/user/check-in-out", async (req, res) => {
       findPreviousCheck
     );
     const { checkInTime, checkOutTime } = findPreviousCheck;
+    ObjCheckInOutUpdate.userId = findPreviousCheck._id;
     if (!ObjCheckInOutUpdate.checkInTime) {
       ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
     }
@@ -107,31 +108,64 @@ router.post("/user/check-in-out", async (req, res) => {
     const endDate = getEndingOfTheDay();
     console.log("get beginning of the day", beginDate);
     console.log("get endding of the day", endDate);
-    activity = await Activity.findOneAndUpdate(
-      {
-        $and: [
-          { userId: findPreviousCheck._id },
-          {
-            checkInTime: {
-              $gt: beginDate,
-              $lte: endDate,
-            },
+
+    // todo test
+    let isCheckInToday =
+      ObjCheckInOutUpdate.checkInTime > beginDate &&
+      ObjCheckInOutUpdate.checkInTime <= endDate
+        ? true
+        : false;
+    let isCheckOutToday =
+      ObjCheckInOutUpdate.checkOutTime > beginDate &&
+      ObjCheckInOutUpdate.checkOutTime <= endDate
+        ? true
+        : false;
+
+    if (isCheckInToday && isCheckOutToday) {
+      console.log("today");
+      activity = await Activity.findOneAndUpdate(
+        {
+          userId: findPreviousCheck._id,
+          checkInTime: {
+            $gt: beginDate,
+            $lte: endDate,
           },
-          {
-            checkOutTime: {
-              $gt: beginDate,
-              $lte: endDate,
-            },
+          checkOutTime: {
+            $gt: beginDate,
+            $lte: endDate,
           },
-        ],
+        },
+        { $set: ObjCheckInOutUpdate },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      )
+        .populate("userId", ["name"])
+        .exec();
+    } else {
+      console.log("not today");
+      activity = await new Activity({
+        ...ObjCheckInOutUpdate,
+      }).save();
+    }
+    const testActivity = await Activity.findOne({
+      userId: findPreviousCheck._id,
+
+      checkInTime: {
+        $gt: beginDate,
+        $lte: endDate,
       },
 
-      ObjCheckInOutUpdate,
+      checkOutTime: {
+        $gt: beginDate,
+        $lte: endDate,
+      },
+    });
+    console.log(
+      "🚀 ~ file: activity.js ~ line 125 ~ router.post ~ testActivity",
+      testActivity
+    );
 
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    )
-      .populate("userId", ["name"])
-      .exec();
+    //todo end test
+
     console.log("update", { activity });
     // test what's going on in data
     const activityData = await Activity.findOne({
