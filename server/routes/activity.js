@@ -22,7 +22,7 @@ router.post("/user/check-in-out", async (req, res) => {
   //build object checkIn checkOut
   const ObjCheckInOutUpdate = {};
   if (checkInTime && isValidDate(checkInTime)) {
-    // const checkInTimeDate = new Date(checkInTime);
+    // const checkInTimeDate = (checkInTime);
     ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
   }
   if (checkOutTime && isValidDate(checkOutTime)) {
@@ -52,9 +52,9 @@ router.post("/user/check-in-out", async (req, res) => {
   try {
     const findPreviousCheck = await User.findOne({
       $or: [
-        { _id: checkOutCodeIdValid },
-        { rfid: checkOutCode },
         { fingerprint: checkOutCode },
+        { rfid: checkOutCode },
+        { _id: checkOutCodeIdValid },
       ],
     }).exec();
     console.log(
@@ -109,17 +109,6 @@ router.post("/user/check-in-out", async (req, res) => {
     console.log("get endding of the day", endDate);
     activity = await Activity.findOneAndUpdate(
       {
-        // $or: [
-        //   { user: req.user.id },
-        //   { rfid: req.rfid },
-        //   { fingerprint: req.fingerprint },
-        // ],
-        // create new db if not found userId
-        // $or: [
-        //   { userId: checkOutCodeIdValid },
-        //   { rfid: checkOutCode },
-        //   { fingerprint: checkOutCode },
-        // ],
         $and: [
           { userId: findPreviousCheck._id },
           {
@@ -145,15 +134,35 @@ router.post("/user/check-in-out", async (req, res) => {
       .exec();
     console.log("update", { activity });
     // test what's going on in data
-    // const activityData = await Activity.findOne({
-    //   userId: findPreviousCheck._id,
-    // });
+    const activityData = await Activity.findOne({
+      _id: activity._id,
+    });
     // console.log(
     //   "🚀 ~ file: activity.js ~ line 91 ~ router.post ~ activityData",
     //   activityData.checkOutTime,
     //   beginDate,
     //   activityData.checkOutTime > beginDate
     // );
+    console.log(
+      `checkInTime ${activityData.checkInTime} > beginDate ${beginDate} is :: ${
+        activityData.checkInTime > beginDate
+      }`
+    );
+    console.log(
+      `checkInTime ${activityData.checkInTime} < endDate ${endDate} is :: ${
+        activityData.checkInTime < endDate
+      }`
+    );
+    console.log(
+      `checkOutTime ${
+        activityData.checkOutTime
+      } > beginDate ${beginDate} is :: ${activityData.checkOutTime > beginDate}`
+    );
+    console.log(
+      `checkOutTime ${activityData.checkOutTime} < endDate ${endDate} is :: ${
+        activityData.checkOutTime < endDate
+      }`
+    );
 
     console.log(
       "🚀 ~ file: activity.js ~ line 135 ~ router.post ~ ObjCheckInOutUpdate",
