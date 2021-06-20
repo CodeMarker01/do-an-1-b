@@ -37,12 +37,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "not-set",
     },
-    CheckInDate: String,
+    // CheckInDate: String,
     checkOutTime: {
       type: String,
       default: "not-set",
     },
-    CheckOutDate: String,
+    // CheckOutDate: String,
     workingTime: String,
     salary: {
       type: Number,

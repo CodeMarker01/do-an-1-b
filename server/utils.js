@@ -14,3 +14,36 @@ exports.isValidDate = (date) => {
 exports.testXiu = (log) => {
   console.log(log);
 };
+
+// convert new date to string (with localTime)
+// and then convert string into date type
+exports.convertTZ = function (date, tzString) {
+  return new Date(
+    (typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {
+      timeZone: tzString,
+    })
+  );
+};
+
+//
+exports.getBeginningOfTheWeek = (now) => {
+  const days = (now.getDay() + 7 - 1) % 7;
+  now.setDate(now.getDate() - days);
+  now.setHours(0, 0, 0, 0);
+  return now;
+};
+
+//get beginning of the day
+exports.getBeginningOfTheDay = () => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  // date.setUTCHours(0, 0, 0, 0);
+  return date;
+};
+//get ending of the day
+exports.getEndingOfTheDay = () => {
+  const date = new Date();
+  date.setHours(23, 59, 59, 0);
+  // date.setUTCHours(23, 59, 59, 0);
+  return date;
+};

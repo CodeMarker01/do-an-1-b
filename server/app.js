@@ -11,6 +11,12 @@ const bodyParser = require("body-parser");
 const { readdirSync } = require("fs");
 require("dotenv").config();
 
+//set TimeZone
+process.env.TZ = "Asia/Ho_Chi_Minh";
+
+// todo test lib
+const { convertTZ } = require("./utils");
+
 let data;
 var sensorData;
 
@@ -89,6 +95,24 @@ app.get("/update-sensor", function (req, res) {
   console.log("update sensor GET-->", data, typeof data);
   res.json(sensorData);
 });
+
+// todo test
+//Asia/Ho_Chi_Minh
+const date = new Date();
+console.log("new Date", date);
+// const dateLocal = convertTZ(date, "Asia/Ho_Chi_Minh");
+// console.log("date after convert", dateLocal);
+// const dateLocal2 = new Date(
+//   date.toLocaleString("en-US", {
+//     timeZone: "Asia/Ho_Chi_Minh",
+//   })
+// );
+// console.log("date local", dateLocal2);
+// const dateLocal3 = new Date("Sun Jun 20 2021 09:31:43 GMT+0700");
+// console.log("🚀 ~ file: app.js ~ line 108 ~ dateLocal3", dateLocal3);
+// const dateLocal4 = new Date()
+
+// todo end test
 
 // port
 const port = process.env.PORT || 8000;
