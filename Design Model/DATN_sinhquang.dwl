@@ -1,0 +1,3 @@
+Windows 10 TIMT
+DESKTOP-KBSLCQ1 
+Thursday, June 17, 2021  7:36:04 PM

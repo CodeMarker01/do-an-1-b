@@ -1,0 +1,3 @@
+Windows 10
+DESKTOP-CLC1LVD 
+Tuesday, June 15, 2021  8:48:19 PM
