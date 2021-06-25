@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  useHistory,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import Topbar from "./components/topbar/Topbar";
 import Sidebar from "./components/sidebar/Sidebar";
@@ -21,12 +15,15 @@ import Alert from "./components/layout/Alert";
 import setAuthToken from "./utils/setAuthToken";
 import { loadUser } from "./actions/auth";
 import store from "./store";
+import History from "./pages/history";
+//route
+import UserRoute from "./components/routes/UserRoute";
+import AdminRoute from "./components/routes/AdminRoute";
 
 const App = () => {
-  // const location = useLocation();
-  // let pathname = location.pathname;
-
   useEffect(() => {
+    //
+    console.log("run useEffect in app.js");
     // check for token in LS
     if (localStorage.token) {
       setAuthToken(localStorage.token);
@@ -42,26 +39,38 @@ const App = () => {
             <Landing />
           </Route>
           <>
-            <div className={"container-udm"}>
+            <div className="container-udm">
               <Alert />
-              <Route exact path="/login">
-                <Login />
-              </Route>
-              <Route exact path="/register">
-                <Register />
-              </Route>
+              <Switch>
+                <Route exact path="/login">
+                  <Login />
+                </Route>
+                <Route exact path="/register">
+                  <Register />
+                </Route>
+                <Route exact path="/history">
+                  <History />
+                </Route>
+              </Switch>
             </div>
+            {/* <div className="container-udm"></div> */}
             <div className="container admin-layout">
-              {/* <Route exact path="/register" component={Register} /> */}
-              {/* <Route exact path="/login" component={Login} /> */}
-              <Route path="/dashboard">
+              <Switch>
+                {/* <Route exact path="/register" component={Register} /> */}
+                {/* <Route exact path="/login" component={Login} /> */}
+                <UserRoute exact path="/dashboard">
+                  <Sidebar />
+                  <Home />
+                </UserRoute>
+                {/* <UserRoute exact path="/dashboard">
                 <Sidebar />
                 <Home />
-              </Route>
-              <Route path="/users">
-                <Sidebar />
-                <UserList />
-              </Route>
+              </UserRoute> */}
+                <UserRoute exact path="/users">
+                  <Sidebar />
+                  <UserList />
+                </UserRoute>
+              </Switch>
             </div>
           </>
         </Switch>

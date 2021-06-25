@@ -1,5 +1,4 @@
 import api from "../utils/api";
-import axios from "axios";
 import { setAlert } from "./alert";
 import {
   REGISTER_SUCCESS,
@@ -41,9 +40,8 @@ export const register = (formData) => async (dispatch) => {
     const errors = err.response.data.errors;
 
     if (errors) {
-      console.log(errors);
       // outside we use connect from redux
-      errors.forEach((error) => dispatch(setAlert(error.msg, "danger", 5000)));
+      errors.forEach((error) => dispatch(setAlert(error.msg, "danger")));
     }
 
     dispatch({
@@ -58,11 +56,14 @@ export const login = (email, password) => async (dispatch) => {
 
   try {
     const res = await api.post("/auth", body);
+    console.log("🚀 ~ file: auth.js ~ line 59 ~ login ~ res", res);
 
     dispatch({
       type: LOGIN_SUCCESS,
       payload: res.data,
     });
+
+    // dispatch({ type: "TEST_CHUT" });
 
     dispatch(loadUser());
   } catch (err) {

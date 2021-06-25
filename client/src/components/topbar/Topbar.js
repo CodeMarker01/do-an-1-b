@@ -2,11 +2,39 @@ import React from "react";
 import "./topbar.scss";
 import { NotificationsNone, Language, Settings } from "@material-ui/icons";
 import { Link, useHistory, useLocation, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../actions/auth";
+import { LOGOUT } from "../../actions/types";
 
 export default function Topbar() {
+  // useHook
   const location = useLocation();
   const pathname = location.pathname;
   console.log("🚀 ~ file: Topbar.js ~ line 9 ~ Topbar ~ pathname", pathname);
+
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  console.log(
+    "🚀 ~ file: Topbar.js ~ line 32 ~ Topbar ~ isAuthenticated",
+    isAuthenticated
+  );
+  console.log("🚀 ~ file: Topbar.js ~ line 33 ~ Topbar ~ user", user);
+
+  //dispatch
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  //function
+  const btnLogOut = () => {
+    // console.log("btnLogOut");
+    // console.log(logout());
+    dispatch(logout());
+    // dispatch({
+    //   type: LOGOUT,
+    // });
+    history.push("/");
+  };
+
+  // render
   return (
     <div
       className={`topbar ${pathname === "/" ? "colorBgForLandingPage" : ""}`}
@@ -22,7 +50,7 @@ export default function Topbar() {
             QuangSinh Inc.
           </Link>
         </div>
-        {pathname !== "/" && (
+        {isAuthenticated && (
           <div className="topRight">
             <div className="topbarIconContainer">
               <NotificationsNone />
@@ -35,11 +63,20 @@ export default function Topbar() {
             <div className="topbarIconContainer">
               <Settings />
             </div>
-            <img
-              src="https://images.pexels.com/photos/1526814/pexels-photo-1526814.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-              alt=""
-              className="topAvatar"
-            />
+            <div className="topbarUserContainer">
+              <img src={user?.avatar} alt="" className="topAvatar" />
+              <div className="topbarUserDropdown">
+                <button className="dropbtn">
+                  Hi <span>{user?.name}</span>
+                </button>
+                <div class="dropdown-content">
+                  <Link to="/user/account">Account Setting</Link>
+                  <a href="#" onClick={btnLogOut}>
+                    Log Out
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
