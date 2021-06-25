@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 exports.authCheck = (req, res, next) => {
   //* Get token from header
@@ -15,6 +16,7 @@ exports.authCheck = (req, res, next) => {
         return res.status(401).json({ msg: "Token is not valid" });
       } else {
         req.user = decoded.user;
+        console.log("authCheck req.user", req.user);
         next();
       }
     });
@@ -25,9 +27,9 @@ exports.authCheck = (req, res, next) => {
 };
 
 exports.adminCheck = async (req, res, next) => {
-  const { email } = req.user;
+  const { id } = req.user;
 
-  const adminUser = await User.findOne({ email }).exec();
+  const adminUser = await User.findOne({ _id: id }).exec();
 
   console.log("ADMIN IN AUTHCHECK", adminUser);
 

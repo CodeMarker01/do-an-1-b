@@ -49,6 +49,7 @@ mongoose
 
 //middlewares
 app.use(bodyParser.json({ limit: "2mb" }));
+app.use(cors());
 
 app.use(logger("dev"));
 app.use(express.json());

@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
 
-const { authCheck } = require("../middlewares/auth");
+const { authCheck, adminCheck } = require("../middlewares/auth");
 
 const {
   createUser,
   getUserByToken,
   signInUser,
+  getAllUsers,
 } = require("../controllers/auth");
 
 /* GET users listing. */
@@ -37,6 +38,12 @@ router.post(
 // @desc     Yes
 router.get("/auth", authCheck, getUserByToken);
 
+// @route    GET api/auth
+// @desc     Get admin by token
+// @access   Private
+// @desc     Yes
+router.get("/auth-admin", authCheck, adminCheck, getUserByToken);
+
 // @route    POST api/update-users
 // @desc     Check emai & pass -> return token
 // @access   Public
@@ -62,6 +69,12 @@ router.post(
   ],
   signInUser
 );
+
+// @route    GET api/user/all
+// @desc     Check emai & pass -> return token
+// @access   Admin
+// @usage    Yes
+router.get("/users/all", authCheck, adminCheck, getAllUsers);
 
 //import
 // const { createOrUpdateUser } = require("../controllers/auth");

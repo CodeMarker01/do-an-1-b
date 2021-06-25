@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 
-const { authCheck } = require("../middlewares/auth");
+const { authCheck, adminCheck } = require("../middlewares/auth");
 const User = require("../models/user");
 const Activity = require("../models/activity");
 const {
@@ -179,13 +179,11 @@ router.post("/user/check-in-out", async (req, res) => {
       const day = date.getDate();
       const month = date.getMonth();
       const year = date.getFullYear();
-      return res
-        .status(400)
-        .json({
-          errors: [
-            { msg: `Must check In/Out on today: ${day}/${month}/${year}` },
-          ],
-        });
+      return res.status(400).json({
+        errors: [
+          { msg: `Must check In/Out on today: ${day}/${month}/${year}` },
+        ],
+      });
     }
     const testActivity = await Activity.findOne({
       userId: findPreviousCheckUser._id,
@@ -254,4 +252,71 @@ router.post("/user/check-in-out", async (req, res) => {
   }
 });
 
+// @route    GET api/user/check-in-out
+// @desc     Get 1 user activity closest day with user email & password
+// @access   Public (test) / User Only
+router.get("/user/check-in-out", async (req, res) => {});
+
+// @route    GET api/user/check-in-out-all
+// @desc     Get all user activity closest day with user email & password
+// @access   Public (test) / User Only
+router.get(
+  "/user/check-in-out/all",
+  authCheck,
+  adminCheck,
+  async (req, res) => {
+    try {
+      const users = await User.find();
+      // users.map((user) => {
+      //   console.log("user._id", user._id);
+      // });
+      // console.log("🚀 ~ file: activity.js ~ line 270 ~ users", users);
+      // const data = JSON.parse(JSON.stringify(users, ["_id", "name", "email"]));
+      //* userFilter less infomation
+      // const usersFilter = users.map((user) => {
+      //   return {
+      //     name: user.name,
+      //     id: user._id,
+      //     email: user.email,
+      //     test: "quang dep trai",
+      //   };
+      // });
+      const activityPerUser = await Promise.all(
+        users.map(async (user) => {
+          const activity = await Activity.find({
+            userId: { $in: user._id },
+          })
+            .sort([["createdAt", "desc"]])
+            .limit(1)
+            .populate("userId", ["name", "email"])
+            .exec();
+          return activity;
+        })
+      );
+      // console.log(
+      //   "🚀 ~ file: activity.js ~ line 289 ~ activityPerUser",
+      //   activityPerUser
+      // );
+      // const activityUser1 = await Activity.findOne({
+      //   userId: users[users.length - 1]._id,
+      // })
+      //   .populate("userId", ["name", "email"])
+      //   .exec();
+
+      res.json(activityPerUser);
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+    }
+  }
+);
+
+// @route    GET api/user/check-in-out-week
+// @desc     Get all activity in current week for 1 user
+// @access   Public (test) / User Only
+router.get("/user/check-in-out/week", async (req, res) => {});
+
+// @route    GET api/user/check-in-out-all
+// @desc     Get all activity in current week for 1 user
+// @access   Public (test) / User Only
 module.exports = router;

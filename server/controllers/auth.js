@@ -180,6 +180,16 @@ exports.signInUser = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
 // exports.createOrUpdateUser = (req, res) => {
 //   res.json({
 //     data: "hey you hit create-or-update-user API endpoint",
