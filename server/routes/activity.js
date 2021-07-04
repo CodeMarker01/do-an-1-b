@@ -9,6 +9,9 @@ const {
   isValidDate,
   getBeginningOfTheDay,
   getEndingOfTheDay,
+  renameKey,
+  getBeginningOfTheWeek,
+  getEnddingOfTheWeek,
 } = require("../utils");
 
 // @route    POST api/user/check-in-out
@@ -16,11 +19,17 @@ const {
 // @access   Public (test)
 //"checkInTime":"2018-12-30T05:59:00"
 
+/**
+ * LOGIC:
+ */
+
 router.post("/user/check-in-out", async (req, res) => {
   const { checkInTime, checkOutTime, checkOutCode } = req.body;
 
-  //build object checkIn checkOut
+  //create an Object to save checkInTime, checkOutTime, checkOutCode
   const ObjCheckInOutUpdate = {};
+
+  // get checkInTime, checkOutTime from REQ, check if idValidDate then save into Object
   if (checkInTime && isValidDate(checkInTime)) {
     // const checkInTimeDate = (checkInTime);
     ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
@@ -30,12 +39,14 @@ router.post("/user/check-in-out", async (req, res) => {
     ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
   }
   if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
-    ObjCheckInOutUpdate.workingTime =
+    ObjCheckInOutUpdate.workingTime = parseFloat(
       Math.abs(
         ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
-      ) / 3600000;
+      ) / 3600000
+    ).toFixed(1);
     //   const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
   }
+
   // check checkOutCode is valid for ObjectId, if not create ObjectId format for exceptioin
   const ObjectId = require("mongoose").Types.ObjectId;
   let checkOutCodeIdValid = "123456789012";
@@ -83,12 +94,22 @@ router.post("/user/check-in-out", async (req, res) => {
         ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
       }
     } else {
-      ObjCheckInOutUpdate.checkOutTime = ObjCheckInOutUpdate.checkInTime;
+      // ObjCheckInOutUpdate.checkOutTime = ObjCheckInOutUpdate.checkInTime;
+      ObjCheckInOutUpdate.checkOutTime = null;
     }
-    ObjCheckInOutUpdate.workingTime =
-      Math.abs(
-        ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
-      ) / 3600000;
+    if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
+      ObjCheckInOutUpdate.workingTime = parseFloat(
+        Math.abs(
+          ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
+        ) / 3600000
+      ).toFixed(1);
+    } else {
+      ObjCheckInOutUpdate.workingTime = null;
+    }
+    console.log(
+      "🚀 ~ file: activity.js ~ line 106 ~ router.post ~ ObjCheckInOutUpdate",
+      ObjCheckInOutUpdate
+    );
 
     let activity;
 
@@ -120,44 +141,71 @@ router.post("/user/check-in-out", async (req, res) => {
     // const year = date.getFullYear();
     // console.log("get current day", new Date(year, month, day));
     // console.log("get current day", new Date(year, month, day, 23, 59, 59, 0));
-    const beginDate = getBeginningOfTheDay();
-    const endDate = getEndingOfTheDay();
+    const beginDate = getBeginningOfTheDay(req.body.checkInTime);
+    const endDate = getEndingOfTheDay(req.body.checkInTime);
     console.log("get beginning of the day", beginDate);
     console.log("get endding of the day", endDate);
 
     // todo test
+    //* check today
     let isCheckInToday =
       ObjCheckInOutUpdate.checkInTime > beginDate &&
       ObjCheckInOutUpdate.checkInTime <= endDate
         ? true
         : false;
     console.log(
-      "🚀 ~ file: activity.js ~ line 116 ~ //.toDate ~ isCheckInToday",
+      "🚀 ~ file: activity.js ~ line 144 ~ //.toDate ~ isCheckInToday",
       isCheckInToday
     );
+
     let isCheckOutToday =
       ObjCheckInOutUpdate.checkOutTime > beginDate &&
       ObjCheckInOutUpdate.checkOutTime <= endDate
         ? true
         : false;
     console.log(
-      "🚀 ~ file: activity.js ~ line 122 ~ //.toDate ~ isCheckOutToday",
+      "🚀 ~ file: activity.js ~ line 151 ~ //.toDate ~ isCheckOutToday",
       isCheckOutToday
     );
 
-    if (isCheckInToday && isCheckOutToday) {
+    //* check if null
+    let isCheckInNull = !ObjCheckInOutUpdate.checkInTime ? true : false;
+    console.log(
+      "🚀 ~ file: activity.js ~ line 143 ~ //.toDate ~ isCheckInNull",
+      isCheckInNull
+    );
+    let isCheckOutNull = !ObjCheckInOutUpdate.checkOutTime ? true : false;
+    console.log(
+      "🚀 ~ file: activity.js ~ line 145 ~ //.toDate ~ isCheckOutNull",
+      isCheckOutNull
+    );
+
+    if (
+      (isCheckInToday || isCheckInNull) &&
+      (isCheckOutToday || isCheckOutNull)
+    ) {
+      console.log(
+        "🚀 ~ file: activity.js ~ line 166 ~ router.post ~ isCheckInToday",
+        isCheckInToday
+      );
       console.log("today");
       activity = await Activity.findOneAndUpdate(
         {
           userId: findPreviousCheckUser._id,
-          checkInTime: {
-            $gt: beginDate,
-            $lte: endDate,
-          },
-          checkOutTime: {
-            $gt: beginDate,
-            $lte: endDate,
-          },
+          $or: [
+            {
+              checkInTime: {
+                $gt: beginDate,
+                $lte: endDate,
+              },
+            },
+            {
+              checkOutTime: {
+                $gt: beginDate,
+                $lte: endDate,
+              },
+            },
+          ],
         },
         { $set: ObjCheckInOutUpdate },
         { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -175,33 +223,38 @@ router.post("/user/check-in-out", async (req, res) => {
     //     .exec();
     // }
     else {
-      const date = new Date();
-      const day = date.getDate();
-      const month = date.getMonth();
-      const year = date.getFullYear();
+      // const date = new Date();
+      // const day = date.getDate();
+      // console.log("🚀 ~ file: activity.js ~ line 201 ~ router.post ~ day", day);
+      // const month = date.getMonth();
+      // const year = date.getFullYear();
+      // console.log(
+      //   `🚀 ~ file: activity.js ~ line 196 ~ router.post ~ date --> Must check In/Out on today: ${day}/${month}/${year}`
+      // );
       return res.status(400).json({
         errors: [
-          { msg: `Must check In/Out on today: ${day}/${month}/${year}` },
+          { msg: `Must check In/Out on today: ${day}/${month + 1}/${year}` },
         ],
       });
     }
-    const testActivity = await Activity.findOne({
-      userId: findPreviousCheckUser._id,
 
-      checkInTime: {
-        $gt: beginDate,
-        $lte: endDate,
-      },
+    // const testActivity = await Activity.findOne({
+    //   userId: findPreviousCheckUser._id,
 
-      checkOutTime: {
-        $gt: beginDate,
-        $lte: endDate,
-      },
-    });
-    console.log(
-      "🚀 ~ file: activity.js ~ line 125 ~ router.post ~ testActivity",
-      testActivity
-    );
+    //   checkInTime: {
+    //     $gt: beginDate,
+    //     $lte: endDate,
+    //   },
+
+    //   checkOutTime: {
+    //     $gt: beginDate,
+    //     $lte: endDate,
+    //   },
+    // });
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 125 ~ router.post ~ testActivity",
+    //   testActivity
+    // );
 
     //todo end test
 
@@ -288,7 +341,7 @@ router.get(
           })
             .sort([["createdAt", "desc"]])
             .limit(1)
-            .populate("userId", ["name", "email"])
+            .populate("userId", ["name", "email", "avatar"])
             .exec();
           return activity;
         })
@@ -303,7 +356,22 @@ router.get(
       //   .populate("userId", ["name", "email"])
       //   .exec();
 
-      res.json(activityPerUser);
+      //* remove outer array to object
+      //* data = [[{time:1,speed:50}],[{time:2,speed53}]]
+      //* -> data = [{time:1,speed:50},{time:2,speed:53}]
+      const activityPerUserArrayObject = activityPerUser.map((row) => {
+        if (Array.isArray(row)) {
+          return (row = row[0]);
+        }
+        return;
+      });
+
+      // filter null, undefined value
+      let activityPerUserArrayObjectFilter = activityPerUserArrayObject.filter(
+        (a) => a
+      );
+
+      res.json(activityPerUserArrayObjectFilter);
     } catch (err) {
       console.error(err.message);
       return res.status(500).send("Server Error");
@@ -314,7 +382,26 @@ router.get(
 // @route    GET api/user/check-in-out-week
 // @desc     Get all activity in current week for 1 user
 // @access   Public (test) / User Only
-router.get("/user/check-in-out/week", async (req, res) => {});
+router.get("/user/check-in-out/week", authCheck, async (req, res) => {
+  const beginWeek = getBeginningOfTheWeek(new Date());
+  const endWeek = getEnddingOfTheWeek(new Date());
+  const { id } = req.user;
+  console.log("id", id);
+  try {
+    // console.log(req.user.id);
+    const activity = await Activity.find({
+      userId: { $in: id },
+      checkInTime: {
+        $gt: beginWeek,
+        $lt: endWeek,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
 
 // @route    GET api/user/check-in-out-all
 // @desc     Get all activity in current week for 1 user

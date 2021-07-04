@@ -19,11 +19,13 @@ const activitySchema = new mongoose.Schema(
       // type: String,
       // default: "not-set",
       type: Date,
-      default: Date.now,
+      // default: Date.now,
+      default: null,
     },
     checkOutTime: {
       type: Date,
-      default: Date.now,
+      // default: Date.now,
+      default: null,
     },
     workingTime: String,
     salary: {

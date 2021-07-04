@@ -25,7 +25,7 @@ exports.convertTZ = function (date, tzString) {
   );
 };
 
-//
+// get beginning of the week
 exports.getBeginningOfTheWeek = (now) => {
   const days = (now.getDay() + 7 - 1) % 7;
   now.setDate(now.getDate() - days);
@@ -33,17 +33,38 @@ exports.getBeginningOfTheWeek = (now) => {
   return now;
 };
 
+// get beginning of the week
+exports.getEnddingOfTheWeek = (now) => {
+  const days = (now.getDay() + 7 - 1) % 7;
+  now.setDate(now.getDate() - days + 6);
+  now.setHours(23, 59, 59, 0);
+  return now;
+};
+
 //get beginning of the day
-exports.getBeginningOfTheDay = () => {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
+exports.getBeginningOfTheDay = (date) => {
+  const dateBegin = date ? new Date(date) : new Date();
+  dateBegin.setHours(0, 0, 0, 0);
   // date.setUTCHours(0, 0, 0, 0);
-  return date;
+  return dateBegin;
 };
 //get ending of the day
-exports.getEndingOfTheDay = () => {
-  const date = new Date();
-  date.setHours(23, 59, 59, 0);
+exports.getEndingOfTheDay = (date) => {
+  const dateEnd = date ? new Date(date) : new Date();
+  dateEnd.setHours(23, 59, 59, 0);
   // date.setUTCHours(23, 59, 59, 0);
-  return date;
+  return dateEnd;
+};
+
+exports.renameKey = (obj, old_key, new_key) => {
+  // check if old key = new key
+  if (old_key !== new_key) {
+    Object.defineProperty(
+      obj,
+      new_key, // modify old key
+      // fetch description from object
+      Object.getOwnPropertyDescriptor(obj, old_key)
+    );
+    delete obj[old_key]; // delete old key
+  }
 };

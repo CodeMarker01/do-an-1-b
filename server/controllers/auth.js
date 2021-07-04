@@ -7,6 +7,7 @@ const normalize = require("normalize-url");
 const User = require("../models/user");
 const Profile = require("../models/Profile");
 const RfidOpenDoor = require("../models/rfidOpenDoor");
+const Activity = require("../models/activity");
 
 // exports.CreateUser = async (req, res) => {
 //   console.log("REQ USER", req.user);
@@ -108,6 +109,16 @@ exports.createUser = async (req, res) => {
         id: user._id,
       },
     };
+
+    // save fisrt activity with checkIn, checkOut = null
+    const activity = new Activity({
+      userId: user._id,
+      checkInTime: null,
+      checkOutTime: null,
+      workingTime: null,
+    });
+    await activity.save();
+    console.log("save db in rfidOpenDoor", rfidOpenDoor);
 
     //* Return jsonwebtoken
     jwt.sign(

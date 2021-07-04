@@ -14,16 +14,26 @@ import {
   Report,
 } from "@material-ui/icons";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function Sidebar() {
+  //redux auth
+  const { user } = useSelector((state) => state.auth);
+  let directToPage;
+  if (user?.role === "admin") {
+    directToPage = "/dashboard";
+  } else if (user?.role === "subscriber") {
+    directToPage = "/dashboardUser";
+  } else {
+    directToPage = "/";
+  }
   return (
     <div className="sidebar">
-      {/*  */}
       <div className="sidebarWrapper">
         <div className="sidebarMenu">
           <h3 className="sidebarTitle">Dashboard</h3>
           <ul className="sidebarList">
-            <Link to="/" className="link">
+            <Link to={directToPage} className="link">
               <li className="sidebarListItem active">
                 <LineStyle className="sidebarIcon" />
                 Home

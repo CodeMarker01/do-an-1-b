@@ -1,17 +1,23 @@
-import React, { Fragment, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import React, { Fragment, useEffect, useState } from "react";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { connect, useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { login } from "../../actions/auth";
 
 const Login = () => {
   // useHook
-  const { isAuthenticated } = useSelector((state) => {
+  const { isAuthenticated, user } = useSelector((state) => {
     // console.log("state --->", state);
     // console.log("{...state} --->", { ...state });
     return state.auth;
   });
+  // console.log(
+  //   "🚀 ~ file: Login.js ~ line 10 ~ const{isAuthenticated,user}=useSelector ~ user",
+  //   user
+  // );
+
   const dispatch = useDispatch();
+  const history = useHistory();
   // console.log(
   //   "🚀 ~ file: Login.js ~ line 12 ~ Login ~ isAuthenticated",
   //   isAuthenticated
@@ -29,12 +35,35 @@ const Login = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+    // setTimeout(() => {
     dispatch(login(email, password));
+    // }, 1000);
+    // dispatch(login(email, password));
   };
 
-  if (isAuthenticated) {
-    return <Redirect to="/dashboard" />;
-  }
+  // useEffect(() => {}, []);
+
+  // redirect
+  // const roleBasedRedirect = async (user) => {
+  //   const role = await user.role;
+  //   if (role === "admin") {
+  //     history.push("/admin/products");
+  //   } else {
+  //     history.push("/");
+  //   }
+  // };
+
+  setTimeout(() => {
+    if (isAuthenticated && user?.role === "admin") {
+      console.log("day la admin");
+      // return <Redirect to="/dashboard" />;
+      history.push("/dashboard");
+    } else if (isAuthenticated) {
+      console.log("day la user");
+      // return <Redirect to="/dashboardUser" />;
+      history.push("/dashboardUser");
+    }
+  }, 500);
 
   return (
     <Fragment>
