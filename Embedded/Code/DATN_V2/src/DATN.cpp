@@ -9,24 +9,18 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include <EEPROM.h>
-//#include <NTPtimeESP.h>
-
 
 #define RST_PIN        14
 #define SS_PIN1         15
 #define SS_PIN        26
 #define SENSOR_DOOR    34
-
 #define RELAY          33
 #define BUZZER         13
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-MFRC522 rfid1(SS_PIN1, RST_PIN); // Instance of the class
+MFRC522 rfid1(SS_PIN1, RST_PIN); // Instance of the class 
 RTC_DS1307 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
-//NTPtime NTPch("0.vn.pool.ntp.org");   // Server NTP
-//strDateTime thoigian;   // Bien gan nhiet do
 
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&Serial2);
 
@@ -146,7 +140,7 @@ NexPage page6 = NexPage(6,0,"set_temp");
 NexPage page_key_pass_admin = NexPage(8, 0, "key_pass_admin");
 
 //KHAI BAO BIEN SU DUNG
-int  ID_CHECK, ID_STORED, ID_DEL, CHECK_ID_STORED, SELECT_FP_RFID = 0;
+int  ID_CHECK, ID_STORED, ID_DEL, CHECK_ID_STORED, SELECT_FP_RFID = 0, ENABLE_OPEN = 0;
 uint32_t   ENA_CHECKIN, ENA_CHECKOUT;
 char ID_CHECK_C[20], ID_STORED_C[20], ID_DEL_C[20], ID_DEL_C2[20], NAME_RESPOND_C[20], Respond_DataCreateUser_C[20], Respond_DataCreateDoor_C[20];
 String NAME_RESPOND_S = {};
@@ -157,7 +151,6 @@ byte moc;
 char UID_C[8], UIDC_C[8]; //15
 uint32_t year1, month1, day1, hour1, minute1, second1, year, month, day, hour, minute, second;
 uint32_t TIME_SET_HMI[7]; //= {2016,11,25,12,34,50};
-
 
 long previousMillis = 0; 
 char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textusern_p4c[20], textpass_p4c[20], textpass2_p4c[20];
@@ -177,19 +170,19 @@ int tempTest = 100;
 double sensorReadingsArr[5];
 
 //KHAI BAO WIFI
-/* const char *ssid = "TANG 2 - 2";
-const char *password = "0936120886";
-const char *serverCreateUser = "http://192.168.0.104:8000/api/create-users";
-const char *serverCreateDoor = "http://192.168.0.104:8000/api/user/create-guest";
-const char *serverCheckUser = "http://192.168.0.104:8000/api/profile/user/check-in-out";  
-const char *serverCheckDoor = "http://192.168.0.104:8000/api/user/open-door"; */
+const char *ssid = "TOTOLINK";
+const char *password = "Motdentam";
+const char *serverCreateUser = "http://192.168.0.2:8000/api/create-users";
+const char *serverCreateDoor = "http://192.168.0.2:8000/api/user/create-guest";
+const char *serverCheckUser = "http://192.168.0.2:8000/api/profile/user/check-in-out";  
+const char *serverCheckDoor = "http://192.168.0.2:8000/api/user/open-door";
 
-const char *ssid = "@@";
+/* const char *ssid = "@@";
 const char *password = "0936120886";
 const char *serverCreateUser = "http://172.20.10.4:8000/api/create-users";  
 const char *serverCreateDoor = "http://172.20.10.4:8000/api/user/create-guest"; 
 const char *serverCheckUser = "http://172.20.10.4:8000/api/user/check-in-out";  
-const char *serverCheckDoor = "http://172.20.10.4:8000/api/user/open-door";
+const char *serverCheckDoor = "http://172.20.10.4:8000/api/user/open-door"; */
 
 //KHAI BAO DOI TUONG CHAM
 NexTouch *nex_listen_list[] = 
@@ -217,11 +210,10 @@ NexTouch *nex_listen_list[] =
   &button_dur_pkeytemp,
   &button_exit_psettemp,
   &button_done_psettemp,
-
   &button_pkrfidsel,
   &button_pkpassad,
   NULL
-};
+}; 
 
 void touch_switchpage_p0_PopCallback(void *ptr)
 {
@@ -351,55 +343,7 @@ void button_pkpassad_PopCallback(void *ptr)
 }
 void button_install_p3_PopCallback(void *ptr)
 {
-  // GET TIME FROM SERVER NTP
-/*   thoigian = NTPch.getNTPtime(7.0, 0);
-  if(thoigian.valid)
-  {
-    hour = thoigian.hour;      
-    minute = thoigian.minute;  
-    second = thoigian.second;  
-    year = thoigian.year;       
-    month = thoigian.month;    
-    day =thoigian.day;         
-  }
- 
-  Serial.println("Update TIME FROM NTP:");
-  Serial.println("TIME NTP:");
-  Serial.print(hour);
-  Serial.print(":");
-  Serial.print(minute);
-  Serial.print(":");
-  Serial.print(second);
-  Serial.println(" ");
-  Serial.print(day);
-  Serial.print("/");
-  Serial.print(month);
-  Serial.print("/");
-  Serial.print(year);
-  delay(1000);
-
-  // UPDATE DS1307
-  if(!rtc.begin())
-  {
-    Serial.println("ERROR");
-    return;
-  }
-  if (! rtc.isrunning()) 
-  {
-    Serial.println("RTC is NOT running, let's set the time!");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    
-  }
-  rtc.adjust(DateTime(year, month, day, hour, minute, second)); // YEAR/MON/DAY/HOUR/MINUTE/SECOND */
-
-// UPDATE TIME FROM DS1307 TO HMI
   GET_TIME();
-/*   var0_year.setValue(year1);
-  var1_month.setValue(month1);
-  var2_day.setValue(day1);
-  var3_hour.setValue(hour1);
-  var4_minute.setValue(minute1);
-  var5_second.setValue(second1);  */
   uint32_t TIME_SET_HMI[7] = {year1, month1, day1, hour1, minute1, second1};   //=  = {2016,11,25,12,34,50};
   RTC.write_rtc_time(TIME_SET_HMI);
   BUZZER_SWITCH(50);
@@ -750,7 +694,6 @@ void setup()
   }
   //rtc.adjust(DateTime(2021, 6, 17, 15, 42, 0)); // YEAR/MON/DAY/HOUR/MINUTE/SECOND
   //RTC.write_rtc_time(TIME_SET_HMI);
-
 //WIFI
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
@@ -765,6 +708,8 @@ void setup()
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
   Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  ENABLE_DOOR = "0";
+  digitalWrite(RELAY, HIGH); //OPEN
 }
 
 void loop() 
@@ -782,16 +727,24 @@ void loop()
     memset(UIDC_C, 0, int(8));
     Serial.println("HAVE CARD"); 
   }
-  
-  if(digitalRead(SENSOR_DOOR) == 0)   //CB DONG:0 - MO: 1
-  {
-    digitalWrite(RELAY, HIGH); //CLOSE
-    Serial.println("CLOSE DOOR");
-  }
-  if( ENABLE_DOOR == "1" )
+  /* OPEN - CLOSE DOOR*/
+  if(ENABLE_DOOR == "1" && digitalRead(SENSOR_DOOR) == 0)
   {
     digitalWrite(RELAY, LOW); //OPEN
     Serial.println("OPEN DOOR");
+    ENABLE_OPEN = 1;
+    ENABLE_DOOR = "0";
+  }
+  else if(ENABLE_OPEN == 1 && digitalRead(SENSOR_DOOR) == 0) //MAINTAIN
+  {
+    digitalWrite(RELAY, LOW); //OPEN
+    Serial.println("OPEN DOOR");
+  }
+  else if(digitalRead(SENSOR_DOOR) == 1)
+  {
+    digitalWrite(RELAY, HIGH); //CLOSE
+    Serial.println("CLOSE DOOR");
+    ENABLE_OPEN = 0;
     ENABLE_DOOR = "0";
   }
   
@@ -819,7 +772,6 @@ void BUZZER_NOTIFICATION(int dl)
     digitalWrite(BUZZER, LOW);
     delay(dl);
   }		
-  
 }
 
 void READ_RFID()
@@ -843,8 +795,6 @@ void READ_RFID()
     UID_B[i] = mfrc522.uid.uidByte[i];
   }
   byte UID_SIZE = sizeof(UID_B);
-  //memset(UID_C, 0, sizeof(UID_SIZE));
-
   //COVERT BYTE TO CHAR
   for (int y = 0; y < UID_SIZE; y++)
   {
@@ -904,7 +854,6 @@ void READ_RFID2()
 {
   SPI.begin(); // Init SPI bus
   rfid1.PCD_Init(); // Init MFRC522
-    
   if ( ! rfid1.PICC_IsNewCardPresent()) 
   {
   return;
@@ -941,13 +890,10 @@ int getFingerprintIDez()
 {
   uint8_t p = finger.getImage();
   if (p != FINGERPRINT_OK)  return -1;
-
   p = finger.image2Tz();
   if (p != FINGERPRINT_OK)  return -1;
-
   p = finger.fingerFastSearch();
   if (p != FINGERPRINT_OK)  return -1;
-
   // found a match!
   Serial.print("P:"); Serial.println(finger.getImage());
   Serial.print("Found ID #"); Serial.print(finger.fingerID);
@@ -1013,7 +959,6 @@ uint8_t getFingerprintEnroll()
   }
   Serial.print("ID "); Serial.println(ID_STORED);
   p = -1;
-
   Serial.println("Place same finger again");
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
@@ -1037,7 +982,6 @@ uint8_t getFingerprintEnroll()
   }
 
   // OK success!
-
   p = finger.image2Tz(2);
   switch (p) {
     case FINGERPRINT_OK:
@@ -1062,7 +1006,6 @@ uint8_t getFingerprintEnroll()
 
   // OK converted!
   Serial.print("Creating model for #");  Serial.println(ID_STORED);
-
   p = finger.createModel();
   if (p == FINGERPRINT_OK) {
     Serial.println("Prints matched!");
@@ -1078,9 +1021,7 @@ uint8_t getFingerprintEnroll()
     Serial.println("Unknown error");
     return p;
   }
-
   Serial.print("ID "); Serial.println(ID_STORED);
-
   p = finger.storeModel(ID_STORED);
   if (p == FINGERPRINT_OK)
   {
@@ -1099,7 +1040,6 @@ uint8_t getFingerprintEnroll()
     Serial.println("Unknown error");
     return p;
   }
-
   return true;
 }
 
@@ -1163,7 +1103,6 @@ void SEND_DATA_STORED()
     Serial.print("Error: ");
     Serial.println(httpResponse_CreateUser);
   }
-  
   http.end(); 
 }
 
@@ -1224,7 +1163,6 @@ void SEND_DATA_CHECK()
     NAME_RESPOND_S.remove(moc,NAME_RESPOND_S.length()-moc); //vi tri, so luong
     Serial.println(NAME_RESPOND_S);   
     NAME_RESPOND_S.toCharArray(NAME_RESPOND_C, sizeof(NAME_RESPOND_S));
-    //sprintf(NAME_RESPOND_C, "%s --", NAME_RESPOND);
     Serial.print("Name: ");
     Serial.println(NAME_RESPOND_C);
     text_inforname_p2.setText( strcat(NAME_RESPOND_C, ": Check In Success") );
@@ -1236,12 +1174,10 @@ void SEND_DATA_CHECK()
     {
       Serial.print("Error code POST EMBEDDED: ");
       Serial.println(httpResponse_CheckIn);
-      text_inforname_p2.setText("USER NOT EXIST");  //SAI --> THIEU K NHAP
+      text_inforname_p2.setText("USER NOT EXIST");  
       delay(1000);
     }
     http.end();
-//    ENA_CHECKIN=0;
-//    select_checkin_p2.setValue(0);
   }
   
   if(ENA_CHECKOUT == 1 && ((ID_CHECK !=0) || (UID_C != NULL)) )
@@ -1310,8 +1246,6 @@ void SEND_DATA_CHECK()
       delay(1000);
     }  
     http.end(); 
-//    ENA_CHECKOUT=0;
-//    select_checkout_p2.setValue(0);
   }
 }
 
@@ -1335,7 +1269,6 @@ void SEND_DATA_CREATEDOOR()
     Serial.print("Error: ");
     Serial.println(httpResponseCreateDoor);
   }
-  
   http.end(); 
 }
 
@@ -1343,11 +1276,9 @@ void SEND_DATA_CHECKDOOR()
 {
   HTTPClient http;
   http.begin(serverCheckDoor);
-   
   String dataCheckDoor = String("{\"rfid\":\"") + UIDC_C + String("\",\"role\":\"") + textpos_psettempc + String("\"}"); 
   http.addHeader("Content-Type", "application/json");
   int httpResponse_CheckDoor = http.POST(dataCheckDoor); // GUI DATA LEN SERVER  
-
   String StringRecive_CheckDoor = "{}"; 
   if (httpResponse_CheckDoor == 200) //GET DATA
   {
@@ -1355,7 +1286,6 @@ void SEND_DATA_CHECKDOOR()
     Serial.println(httpResponse_CheckDoor); //SEND DATA
     StringRecive_CheckDoor = http.getString();
     Serial.println(StringRecive_CheckDoor);  //GET RESPONDE
-
     // -------------------------------------- PROCESS JSON -----------------------------------------------//
     JSONVar ObjectRecive_CheckDoor = JSON.parse(StringRecive_CheckDoor);  // STEP1
     JSONVar keysCheckDoor = ObjectRecive_CheckDoor.keys();                 // STEP2
