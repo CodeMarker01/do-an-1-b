@@ -9,6 +9,7 @@ const {
   getUserByToken,
   signInUser,
   getAllUsers,
+  remove,
 } = require("../controllers/auth");
 
 /* GET users listing. */
@@ -79,5 +80,12 @@ router.get("/users/all", authCheck, adminCheck, getAllUsers);
 //import
 // const { createOrUpdateUser } = require("../controllers/auth");
 // router.get("/create-user", createOrUpdateUser);
+
+// @route    DELETE api/user/:id
+// @desc     Check id & delete user -> return id
+// @access   Admin
+// @usage    Yes
+//delete product
+router.post("/user/delete", remove);
 
 module.exports = router;

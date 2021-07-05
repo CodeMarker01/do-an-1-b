@@ -206,3 +206,32 @@ exports.getAllUsers = async (req, res) => {
 //     data: "hey you hit create-or-update-user API endpoint",
 //   });
 // };
+
+exports.remove = async (req, res) => {
+  // const { productInfo, productDetail } = req.body;
+  // console.log("PRODUCT INFO ID:", productInfo._id);
+  // console.log("REQ :", req.params.id);
+  try {
+    const deleted = await User.findOneAndRemove({
+      // _id: req.params.id,
+      name: req.body.name,
+    }).exec();
+    // find user
+    // const deleted = await User.findOne({
+    //   name: req.body.name,
+    // });
+    // remove user activity
+    const deletedActivity = await Activity.deleteMany({
+      userId: deleted._id,
+    }).exec();
+    res.json(deleted);
+    // const findProduct = await Product.find({ slug: req.params.slug }).exec();
+    // const findProductDetail = await ProductDetail.find({
+    //   productSlug: req.params.slug,
+    // }).exec();
+    // res.json(findProductDetail + `cuocsong`);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Product delete failed");
+  }
+};
