@@ -7,6 +7,7 @@ const activitySchema = new mongoose.Schema(
       type: ObjectId,
       ref: "User",
     },
+    username: { type: String },
     //     rfid: {
     //       type: ObjectId,
     //       ref: "User",

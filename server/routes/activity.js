@@ -81,9 +81,10 @@ router.post("/user/check-in-out", async (req, res) => {
     );
     //add userId to Object
     ObjCheckInOutUpdate.userId = findPreviousCheckUser._id;
+    ObjCheckInOutUpdate.username = findPreviousCheckUser.name;
 
     // find checkInTime, checkOutTime in activity
-    if (findPreviousCheckActivite.length >= 2) {
+    if (findPreviousCheckActivite.length >= 1) {
       const { checkInTime, checkOutTime } =
         findPreviousCheckActivite[findPreviousCheckActivite.length - 1];
 
@@ -304,6 +305,11 @@ router.post("/user/check-in-out", async (req, res) => {
       "🚀 ~ file: activity.js ~ line 135 ~ router.post ~ ObjCheckInOutUpdate",
       ObjCheckInOutUpdate
     );
+
+    // add name to activity
+    // activity.username = await "test";
+    // console.log("acitivity cuoc song", activity);
+    // console.log("acitivity cuoc song", activity.username);
 
     if (!activity) {
       return res.status(404).send("activity Not Found");
