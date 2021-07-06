@@ -83,7 +83,7 @@ router.post("/user/check-in-out", async (req, res) => {
     ObjCheckInOutUpdate.userId = findPreviousCheckUser._id;
 
     // find checkInTime, checkOutTime in activity
-    if (findPreviousCheckActivite.length > 0) {
+    if (findPreviousCheckActivite.length >= 2) {
       const { checkInTime, checkOutTime } =
         findPreviousCheckActivite[findPreviousCheckActivite.length - 1];
 
@@ -180,6 +180,16 @@ router.post("/user/check-in-out", async (req, res) => {
       isCheckOutNull
     );
 
+    //* null but use new Date (null) -> 1/1/1970
+    // let isCheckInFirstDay =
+    //   ObjCheckInOutUpdate.checkInTime == new Date(null) ? true : false;
+    // let isCheckOutFirstDay =
+    //   ObjCheckInOutUpdate.checkOutTime == new Date(null) ? true : false;
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 187 ~ //.toDate ~ new Date(null)",
+    //   new Date(null)
+    // );
+
     if (
       (isCheckInToday || isCheckInNull) &&
       (isCheckOutToday || isCheckOutNull)
@@ -223,11 +233,11 @@ router.post("/user/check-in-out", async (req, res) => {
     //     .exec();
     // }
     else {
-      // const date = new Date();
-      // const day = date.getDate();
+      const date = new Date();
+      const day = date.getDate();
       // console.log("🚀 ~ file: activity.js ~ line 201 ~ router.post ~ day", day);
-      // const month = date.getMonth();
-      // const year = date.getFullYear();
+      const month = date.getMonth();
+      const year = date.getFullYear();
       // console.log(
       //   `🚀 ~ file: activity.js ~ line 196 ~ router.post ~ date --> Must check In/Out on today: ${day}/${month}/${year}`
       // );
