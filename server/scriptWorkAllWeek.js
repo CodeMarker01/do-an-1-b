@@ -29,6 +29,7 @@ const addDb = async () => {
     };
     dumpWork.workingTime =
       Math.abs(dumpWork.checkOutTime - dumpWork.checkInTime) / 3600000;
+    dumpWork.username = "test";
     const activity = new Activity(dumpWork);
     await activity.save();
   }
