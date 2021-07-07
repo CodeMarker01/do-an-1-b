@@ -223,17 +223,16 @@ router.post("/user/check-in-out", async (req, res) => {
       )
         .populate("userId", ["name"])
         .exec();
-    }
-    // else {
-    //   console.log("not today");
-    //   activity = await new Activity({
-    //     ...ObjCheckInOutUpdate,
-    //   })
-    //     .save()
-    //     .populate("userId", ["name"])
-    //     .exec();
-    // }
-    else {
+    } else {
+      console.log("not today");
+      activity = await new Activity({
+        ...ObjCheckInOutUpdate,
+      })
+        .save()
+        .populate("userId", ["name"])
+        .exec();
+      // }
+      // else {
       const date = new Date();
       const day = date.getDate();
       // console.log("🚀 ~ file: activity.js ~ line 201 ~ router.post ~ day", day);
