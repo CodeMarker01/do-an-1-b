@@ -49,12 +49,32 @@ const UserHome = () => {
     },
   ];
   //* chay duoc
+  // console.log("userData", userData3);
+  // console.log(
+  //   `userDate checkInTime:---> ${userData3[0].checkInTime},${typeof userData3[0]
+  //     .checkInTime},
+  //    checkOutTime:---> ${userData3[0].checkOutTime},
+  //    checkInTime - checkOutTime = ${Math.abs(
+  //      new Date(userData3[0].checkOutTime) -
+  //        new Date(userData3[0].checkInTime) / 3600000
+  //    )}
+  //    `
+  // );
   let userData3Filter = userData3.map((u) => {
     return {
       name: new Date(u.checkInTime).toDateString().split(" ")[0],
-      Worked: u.workingTime,
+      // Worked: u.workingTime,
+      Worked:
+        u.checkOutTime && u.checkInTime
+          ? Math.abs(new Date(u.checkOutTime) - new Date(u.checkInTime)) /
+            3600000
+          : 0,
     };
   });
+  // console.log(
+  //   "🚀 ~ file: UserHome.js ~ line 69 ~ userData3Filter ~ userData3Filter",
+  //   userData3Filter
+  // );
 
   // console.log("useState userData3", userData3);
   // console.log(
@@ -92,7 +112,7 @@ const UserHome = () => {
   for (let chart of userData3Chart) {
     for (let filter of userData3Filter) {
       if (chart.name === filter.name) {
-        chart.Worked = parseFloat(filter.Worked);
+        chart.Worked = parseFloat(filter.Worked).toFixed(1);
         break;
       } else {
         chart.Worked = 0;

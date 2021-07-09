@@ -23,6 +23,13 @@ export default function UserList() {
   //   });
   // }, []);
 
+  //todo test handle click
+  const handleClick = (e) => {
+    // document.body.style.overflow = "hidden";
+    // dispatch(loadDetail(id));
+    console.log(e);
+  };
+
   let tableDataMui = [];
   tableDataMui = tableData.map((obj, index) => {
     return (tableDataMui = {
@@ -30,10 +37,18 @@ export default function UserList() {
       name: obj.userId.name,
       avatar: obj.userId.avatar,
       email: obj.userId.email,
-      date: obj.date,
+      date: obj.checkInTime,
       checkInTime: obj.checkInTime,
       checkOutTime: obj.checkOutTime,
-      workingTime: obj.workingTime,
+      // workingTime: obj.workingTime,
+      workingTime:
+        obj.checkInTime && obj.checkOutTime
+          ? parseFloat(
+              Math.abs(new Date(obj.checkOutTime) - new Date(obj.checkInTime)) /
+                3600000
+            ).toFixed(1)
+          : 0,
+      userId: obj._id,
     });
   });
 
@@ -128,7 +143,7 @@ export default function UserList() {
       renderCell: (params) => {
         return (
           <>
-            <Link to={"/user/" + params.row.id}>
+            <Link to={"/user/" + params.row.userId}>
               <button className="userListEdit">Edit</button>
             </Link>
             <DeleteOutline
@@ -158,6 +173,7 @@ export default function UserList() {
             sort: "desc",
           },
         ]}
+        // onClick={handleClick}
       />
       {/* {JSON.stringify(tableData)} */}
     </div>

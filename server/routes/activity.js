@@ -27,92 +27,94 @@ router.post("/user/check-in-out", async (req, res) => {
   const { checkInTime, checkOutTime, checkOutCode } = req.body;
 
   //create an Object to save checkInTime, checkOutTime, checkOutCode
-  const ObjCheckInOutUpdate = {};
+  // const ObjCheckInOutUpdate = {};
 
   // get checkInTime, checkOutTime from REQ, check if idValidDate then save into Object
-  if (checkInTime && isValidDate(checkInTime)) {
-    // const checkInTimeDate = (checkInTime);
-    ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
-  }
-  if (checkOutTime && isValidDate(checkOutTime)) {
-    // const checkOutTimeDate = new Date(checkOutTime);
-    ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
-  }
-  if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
-    ObjCheckInOutUpdate.workingTime = parseFloat(
-      Math.abs(
-        ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
-      ) / 3600000
-    ).toFixed(1);
-    //   const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
-  }
+  // if (checkInTime && isValidDate(checkInTime)) {
+  //   // const checkInTimeDate = (checkInTime);
+  //   ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
+  // }
+  // if (checkOutTime && isValidDate(checkOutTime)) {
+  //   // const checkOutTimeDate = new Date(checkOutTime);
+  //   ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
+  // }
+  // if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
+  //   ObjCheckInOutUpdate.workingTime = parseFloat(
+  //     Math.abs(
+  //       ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
+  //     ) / 3600000
+  //   ).toFixed(1);
+  //   //   const diffTime = Math.abs(checkOutTimeDate - checkInTimeDate) / 3600000;
+  // }
 
-  // check checkOutCode is valid for ObjectId, if not create ObjectId format for exceptioin
-  const ObjectId = require("mongoose").Types.ObjectId;
-  let checkOutCodeIdValid = "123456789012";
-  if (ObjectId.isValid(checkOutCode)) {
-    checkOutCodeIdValid = ObjectId(
-      checkOutCode.length < 12 ? "123456789012" : checkOutCode
-    );
-  }
-  console.log("Object Id checkout-->", checkOutCodeIdValid);
-  console.log("ObjCheckInOutUpdate", ObjCheckInOutUpdate);
+  // // check checkOutCode is valid for ObjectId, if not create ObjectId format for exceptioin
+  // const ObjectId = require("mongoose").Types.ObjectId;
+  // let checkOutCodeIdValid = "123456789012";
+  // if (ObjectId.isValid(checkOutCode)) {
+  //   checkOutCodeIdValid = ObjectId(
+  //     checkOutCode.length < 12 ? "123456789012" : checkOutCode
+  //   );
+  // }
+  // console.log("Object Id checkout-->", checkOutCodeIdValid);
+  // console.log("ObjCheckInOutUpdate", ObjCheckInOutUpdate);
   // You should make string 'param' as ObjectId type. To avoid exception,
   // the 'param' must consist of more than 12 characters.
 
   try {
-    const findPreviousCheckUser = await User.findOne({
-      $or: [
-        { _id: checkOutCodeIdValid },
-        { fingerprint: checkOutCode },
-        { rfid: checkOutCode },
-      ],
-    }).exec();
-    console.log(
-      "🚀 ~ file: profile.js ~ line 82 ~ router.post ~ findPreviousCheckUser",
-      findPreviousCheckUser
-    );
-    const findPreviousCheckActivite = await Activity.find({
-      userId: findPreviousCheckUser._id,
-    });
-    console.log(
-      "🚀 ~ file: activity.js ~ line 67 ~ router.post ~ findPreviousCheckActivite",
-      findPreviousCheckActivite
-    );
+    //find userId with fingerprint or rfid
+    // const findPreviousCheckUser = await User.findOne({
+    //   $or: [
+    //     { _id: checkOutCodeIdValid },
+    //     { fingerprint: checkOutCode },
+    //     { rfid: checkOutCode },
+    //   ],
+    // }).exec();
+    // console.log(
+    //   "🚀 ~ file: profile.js ~ line 82 ~ router.post ~ findPreviousCheckUser",
+    //   findPreviousCheckUser
+    // );
+    // // find all activity with current
+    // const findPreviousCheckActivite = await Activity.find({
+    //   userId: findPreviousCheckUser._id,
+    // });
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 67 ~ router.post ~ findPreviousCheckActivite",
+    //   findPreviousCheckActivite
+    // );
     //add userId to Object
-    ObjCheckInOutUpdate.userId = findPreviousCheckUser._id;
-    ObjCheckInOutUpdate.username = findPreviousCheckUser.name;
+    // ObjCheckInOutUpdate.userId = findPreviousCheckUser._id;
+    // ObjCheckInOutUpdate.username = findPreviousCheckUser.name;
 
     // find checkInTime, checkOutTime in activity
-    if (findPreviousCheckActivite.length >= 1) {
-      const { checkInTime, checkOutTime } =
-        findPreviousCheckActivite[findPreviousCheckActivite.length - 1];
+    // if (findPreviousCheckActivite.length >= 1) {
+    //   const { checkInTime, checkOutTime } =
+    //     findPreviousCheckActivite[findPreviousCheckActivite.length - 1];
 
-      if (!ObjCheckInOutUpdate.checkInTime) {
-        ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
-      }
-      if (!ObjCheckInOutUpdate.checkOutTime) {
-        ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
-      }
-    } else {
-      // ObjCheckInOutUpdate.checkOutTime = ObjCheckInOutUpdate.checkInTime;
-      ObjCheckInOutUpdate.checkOutTime = null;
-    }
-    if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
-      ObjCheckInOutUpdate.workingTime = parseFloat(
-        Math.abs(
-          ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
-        ) / 3600000
-      ).toFixed(1);
-    } else {
-      ObjCheckInOutUpdate.workingTime = null;
-    }
-    console.log(
-      "🚀 ~ file: activity.js ~ line 106 ~ router.post ~ ObjCheckInOutUpdate",
-      ObjCheckInOutUpdate
-    );
+    //   if (!ObjCheckInOutUpdate.checkInTime) {
+    //     ObjCheckInOutUpdate.checkInTime = new Date(checkInTime);
+    //   }
+    //   if (!ObjCheckInOutUpdate.checkOutTime) {
+    //     ObjCheckInOutUpdate.checkOutTime = new Date(checkOutTime);
+    //   }
+    // } else {
+    //   // ObjCheckInOutUpdate.checkOutTime = ObjCheckInOutUpdate.checkInTime;
+    //   ObjCheckInOutUpdate.checkOutTime = null;
+    // }
+    // if (ObjCheckInOutUpdate.checkInTime && ObjCheckInOutUpdate.checkOutTime) {
+    //   ObjCheckInOutUpdate.workingTime = parseFloat(
+    //     Math.abs(
+    //       ObjCheckInOutUpdate.checkInTime - ObjCheckInOutUpdate.checkOutTime
+    //     ) / 3600000
+    //   ).toFixed(1);
+    // } else {
+    //   ObjCheckInOutUpdate.workingTime = null;
+    // }
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 106 ~ router.post ~ ObjCheckInOutUpdate",
+    //   ObjCheckInOutUpdate
+    // );
 
-    let activity;
+    // let activity;
 
     // console.log(
     //   `ngay trong tuan se bat dau tu ${moment()
@@ -142,47 +144,47 @@ router.post("/user/check-in-out", async (req, res) => {
     // const year = date.getFullYear();
     // console.log("get current day", new Date(year, month, day));
     // console.log("get current day", new Date(year, month, day, 23, 59, 59, 0));
-    const beginDate = getBeginningOfTheDay(req.body.checkInTime);
-    const endDate = getEndingOfTheDay(req.body.checkInTime);
-    console.log("get beginning of the day", beginDate);
-    console.log("get endding of the day", endDate);
+    // const beginDate = getBeginningOfTheDay(req.body.checkInTime);
+    // const endDate = getEndingOfTheDay(req.body.checkInTime);
+    // console.log("get beginning of the day", beginDate);
+    // console.log("get endding of the day", endDate);
 
     // todo test
     //* check today
-    let isCheckInToday =
-      ObjCheckInOutUpdate.checkInTime > beginDate &&
-      ObjCheckInOutUpdate.checkInTime <= endDate
-        ? true
-        : false;
-    console.log(
-      "🚀 ~ file: activity.js ~ line 144 ~ //.toDate ~ isCheckInToday",
-      isCheckInToday
-    );
+    // let isCheckInToday =
+    //   ObjCheckInOutUpdate.checkInTime > beginDate &&
+    //   ObjCheckInOutUpdate.checkInTime <= endDate
+    //     ? true
+    //     : false;
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 144 ~ //.toDate ~ isCheckInToday",
+    //   isCheckInToday
+    // );
 
-    let isCheckOutToday =
-      ObjCheckInOutUpdate.checkOutTime > beginDate &&
-      ObjCheckInOutUpdate.checkOutTime <= endDate
-        ? true
-        : false;
-    console.log(
-      "🚀 ~ file: activity.js ~ line 151 ~ //.toDate ~ isCheckOutToday",
-      isCheckOutToday
-    );
+    // let isCheckOutToday =
+    //   ObjCheckInOutUpdate.checkOutTime > beginDate &&
+    //   ObjCheckInOutUpdate.checkOutTime <= endDate
+    //     ? true
+    //     : false;
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 151 ~ //.toDate ~ isCheckOutToday",
+    //   isCheckOutToday
+    // );
 
-    //* check if null
-    let isCheckInNull = !ObjCheckInOutUpdate.checkInTime ? true : false;
-    console.log(
-      "🚀 ~ file: activity.js ~ line 143 ~ //.toDate ~ isCheckInNull",
-      isCheckInNull
-    );
-    let isCheckOutNull = !ObjCheckInOutUpdate.checkOutTime ? true : false;
-    console.log(
-      "🚀 ~ file: activity.js ~ line 145 ~ //.toDate ~ isCheckOutNull",
-      isCheckOutNull
-    );
+    // //* check if null
+    // let isCheckInNull = !ObjCheckInOutUpdate.checkInTime ? true : false;
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 143 ~ //.toDate ~ isCheckInNull",
+    //   isCheckInNull
+    // );
+    // let isCheckOutNull = !ObjCheckInOutUpdate.checkOutTime ? true : false;
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 145 ~ //.toDate ~ isCheckOutNull",
+    //   isCheckOutNull
+    // );
 
     //* null but use new Date (null) -> 1/1/1970
-    // let isCheckInFirstDay =
+    // let isCheckInFirstDay =pomo
     //   ObjCheckInOutUpdate.checkInTime == new Date(null) ? true : false;
     // let isCheckOutFirstDay =
     //   ObjCheckInOutUpdate.checkOutTime == new Date(null) ? true : false;
@@ -191,63 +193,161 @@ router.post("/user/check-in-out", async (req, res) => {
     //   new Date(null)
     // );
 
-    if (
-      (isCheckInToday || isCheckInNull) &&
-      (isCheckOutToday || isCheckOutNull)
-    ) {
-      console.log(
-        "🚀 ~ file: activity.js ~ line 166 ~ router.post ~ isCheckInToday",
-        isCheckInToday
+    //todo checkIn v2
+    const ObjCheckInOutUpdate = {};
+    let activity;
+
+    // check checkOutCode is valid for ObjectId, if not create ObjectId format for exceptioin
+    // check xem co checkOutCode ko
+    if (!checkOutCode) {
+      return res.status(404).send("not found fingerprint or RFID code");
+    }
+    const ObjectId = require("mongoose").Types.ObjectId;
+    let checkOutCodeIdValid = "123456789012";
+    if (ObjectId.isValid(checkOutCode)) {
+      checkOutCodeIdValid = ObjectId(
+        checkOutCode.length < 12 ? "123456789012" : checkOutCode
       );
-      console.log("today");
+    }
+
+    // khi co checkOUtCode tim userId theo checkOutCode
+    //find userId with fingerprint or rfid
+    const findPreviousCheckUser = await User.findOne({
+      $or: [
+        { _id: checkOutCodeIdValid },
+        { fingerprint: checkOutCode },
+        { rfid: checkOutCode },
+      ],
+    }).exec();
+    console.log(
+      "🚀 ~ file: profile.js ~ line 82 ~ router.post ~ findPreviousCheckUser",
+      findPreviousCheckUser
+    );
+    if (!findPreviousCheckUser) {
+      return res.status(404).send("User not found!");
+    }
+
+    // find all activity with current
+    // tim tat ca activity theo user hien tai
+    const findPreviousCheckActivite = await Activity.find({
+      userId: findPreviousCheckUser._id,
+    });
+    console.log(
+      "🚀 ~ file: activity.js ~ line 67 ~ router.post ~ findPreviousCheckActivite",
+      findPreviousCheckActivite
+    );
+
+    ObjCheckInOutUpdate.userId = findPreviousCheckUser._id;
+    ObjCheckInOutUpdate.username = findPreviousCheckUser.name;
+    if (checkInTime && isValidDate(checkInTime)) {
+      const beginDate = getBeginningOfTheDay(req.body.checkInTime);
+      const endDate = getEndingOfTheDay(req.body.checkInTime);
+      ObjCheckInOutUpdate.checkInTime = checkInTime;
+
       activity = await Activity.findOneAndUpdate(
         {
+          // tim userId tuong ung
           userId: findPreviousCheckUser._id,
-          $or: [
-            {
-              checkInTime: {
-                $gt: beginDate,
-                $lte: endDate,
-              },
-            },
-            {
-              checkOutTime: {
-                $gt: beginDate,
-                $lte: endDate,
-              },
-            },
-          ],
+          // tim checkIn da co trong day chua
+          checkInTime: {
+            $gte: beginDate,
+            $lte: endDate,
+          },
         },
         { $set: ObjCheckInOutUpdate },
         { new: true, upsert: true, setDefaultsOnInsert: true }
       )
         .populate("userId", ["name"])
         .exec();
-    } else {
-      console.log("not today");
-      activity = await new Activity({
-        ...ObjCheckInOutUpdate,
-      })
-        .save()
+    } else if (checkOutTime && isValidDate(checkOutTime)) {
+      const beginDate = getBeginningOfTheDay(req.body.checkOutTime);
+      const endDate = getEndingOfTheDay(req.body.checkOutTime);
+      ObjCheckInOutUpdate.checkOutTime = checkOutTime;
+
+      activity = await Activity.findOneAndUpdate(
+        {
+          // tim userId tuong ung
+          userId: findPreviousCheckUser._id,
+          // tim checkIn da co trong day chua
+          $or: [
+            {
+              checkInTime: {
+                $gte: beginDate,
+                $lte: endDate,
+              },
+            },
+            {
+              checkOutTime: {
+                $gte: beginDate,
+                $lte: endDate,
+              },
+            },
+          ],
+        },
+        { $set: ObjCheckInOutUpdate },
+        { new: true }
+      )
         .populate("userId", ["name"])
         .exec();
-      // }
-      // else {
-      const date = new Date();
-      const day = date.getDate();
-      // console.log("🚀 ~ file: activity.js ~ line 201 ~ router.post ~ day", day);
-      const month = date.getMonth();
-      const year = date.getFullYear();
-      // console.log(
-      //   `🚀 ~ file: activity.js ~ line 196 ~ router.post ~ date --> Must check In/Out on today: ${day}/${month}/${year}`
-      // );
-      return res.status(400).json({
-        errors: [
-          { msg: `Must check In/Out on today: ${day}/${month + 1}/${year}` },
-        ],
-      });
     }
+    // if (
+    //   (isCheckInToday || isCheckInNull) &&
+    //   (isCheckOutToday || isCheckOutNull)
+    // ) {
+    //   //todo end checkIn v2
 
+    //   console.log(
+    //     "🚀 ~ file: activity.js ~ line 166 ~ router.post ~ isCheckInToday",
+    //     isCheckInToday
+    //   );
+    //   console.log("today");
+    //   activity = await Activity.findOneAndUpdate(
+    //     {
+    //       userId: findPreviousCheckUser._id,
+    //       $or: [
+    //         {
+    //           checkInTime: {
+    //             $gt: beginDate,
+    //             $lte: endDate,
+    //           },
+    //         },
+    //         {
+    //           checkOutTime: {
+    //             $gt: beginDate,
+    //             $lte: endDate,
+    //           },
+    //         },
+    //       ],
+    //     },
+    //     { $set: ObjCheckInOutUpdate },
+    //     { new: true, upsert: true, setDefaultsOnInsert: true }
+    //   )
+    //     .populate("userId", ["name"])
+    //     .exec();
+    // } else {
+    //   console.log("not today");
+    //   activity = await new Activity({
+    //     ...ObjCheckInOutUpdate,
+    //   })
+    //     .save()
+    //     .populate("userId", ["name"])
+    //     .exec();
+    //   // }
+    //   // else {
+    //   const date = new Date();
+    //   const day = date.getDate();
+    //   // console.log("🚀 ~ file: activity.js ~ line 201 ~ router.post ~ day", day);
+    //   const month = date.getMonth();
+    //   const year = date.getFullYear();
+    //   // console.log(
+    //   //   `🚀 ~ file: activity.js ~ line 196 ~ router.post ~ date --> Must check In/Out on today: ${day}/${month}/${year}`
+    //   // );
+    //   return res.status(400).json({
+    //     errors: [
+    //       { msg: `Must check In/Out on today: ${day}/${month + 1}/${year}` },
+    //     ],
+    //   });
+    // }
     // const testActivity = await Activity.findOne({
     //   userId: findPreviousCheckUser._id,
 
@@ -270,35 +370,35 @@ router.post("/user/check-in-out", async (req, res) => {
 
     console.log("update", { activity });
     // test what's going on in data
-    const activityData = await Activity.findOne({
-      _id: activity._id,
-    });
-    console.log(
-      "🚀 ~ file: activity.js ~ line 91 ~ router.post ~ activityData",
-      activityData.checkOutTime,
-      beginDate,
-      activityData.checkOutTime > beginDate
-    );
-    console.log(
-      `checkInTime ${activityData.checkInTime} > beginDate ${beginDate} is :: ${
-        activityData.checkInTime > beginDate
-      }`
-    );
-    console.log(
-      `checkInTime ${activityData.checkInTime} < endDate ${endDate} is :: ${
-        activityData.checkInTime < endDate
-      }`
-    );
-    console.log(
-      `checkOutTime ${
-        activityData.checkOutTime
-      } > beginDate ${beginDate} is :: ${activityData.checkOutTime > beginDate}`
-    );
-    console.log(
-      `checkOutTime ${activityData.checkOutTime} < endDate ${endDate} is :: ${
-        activityData.checkOutTime < endDate
-      }`
-    );
+    // const activityData = await Activity.findOne({
+    //   _id: activity._id,
+    // });
+    // console.log(
+    //   "🚀 ~ file: activity.js ~ line 91 ~ router.post ~ activityData",
+    //   activityData.checkOutTime,
+    //   beginDate,
+    //   activityData.checkOutTime > beginDate
+    // );
+    // console.log(
+    //   `checkInTime ${activityData.checkInTime} > beginDate ${beginDate} is :: ${
+    //     activityData.checkInTime > beginDate
+    //   }`
+    // );
+    // console.log(
+    //   `checkInTime ${activityData.checkInTime} < endDate ${endDate} is :: ${
+    //     activityData.checkInTime < endDate
+    //   }`
+    // );
+    // console.log(
+    //   `checkOutTime ${
+    //     activityData.checkOutTime
+    //   } > beginDate ${beginDate} is :: ${activityData.checkOutTime > beginDate}`
+    // );
+    // console.log(
+    //   `checkOutTime ${activityData.checkOutTime} < endDate ${endDate} is :: ${
+    //     activityData.checkOutTime < endDate
+    //   }`
+    // );
 
     console.log(
       "🚀 ~ file: activity.js ~ line 135 ~ router.post ~ ObjCheckInOutUpdate",
