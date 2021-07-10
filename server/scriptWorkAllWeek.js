@@ -23,13 +23,13 @@ const addDb = async () => {
   for (let i = 0; i <= 7; i++) {
     const dumpWork = {
       // userId: "60cf4873b401ed7068dd5b88",
-      userId: "60e84335fd6634434879d2f2",
+      userId: "60e96ef5fa57e333f4890af2", 
       checkInTime: randomCheckIn(getBeginningOfTheWeek(new Date()), i),
       checkOutTime: randomCheckOut(getBeginningOfTheWeek(new Date()), i),
     };
     // dumpWork.workingTime =
     // Math.abs(dumpWork.checkOutTime - dumpWork.checkInTime) / 3600000;
-    dumpWork.username = "test";
+    dumpWork.username = "Sinh Pham";
     const activity = new Activity(dumpWork);
     await activity.save();
   }
