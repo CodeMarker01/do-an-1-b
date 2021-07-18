@@ -12,13 +12,14 @@ const {
   renameKey,
   getBeginningOfTheWeek,
   getEnddingOfTheWeek,
+  getBeginningOfTheMonth,
+  getEnddingOfTheMonth,
 } = require("../utils");
 
 // @route    POST api/user/check-in-out
 // @desc     Create or update user profile
 // @access   Public (test)
 //"checkInTime":"2018-12-30T05:59:00"
-
 /**
  * LOGIC:
  */
@@ -243,6 +244,7 @@ router.post("/user/check-in-out", async (req, res) => {
       const beginDate = getBeginningOfTheDay(req.body.checkInTime);
       const endDate = getEndingOfTheDay(req.body.checkInTime);
       ObjCheckInOutUpdate.checkInTime = checkInTime;
+      ObjCheckInOutUpdate.date = checkInTime;
 
       activity = await Activity.findOneAndUpdate(
         {
@@ -500,6 +502,7 @@ router.get(
 router.get("/user/check-in-out/week", authCheck, async (req, res) => {
   const beginWeek = getBeginningOfTheWeek(new Date());
   const endWeek = getEnddingOfTheWeek(new Date());
+
   const { id } = req.user;
   console.log("id", id);
   try {
@@ -518,7 +521,126 @@ router.get("/user/check-in-out/week", authCheck, async (req, res) => {
   }
 });
 
+// @route    GET api/user/check-in-out-week
+// @desc     Get all activity in current week for 1 user
+// @access   Public (test) / User Only
+router.get("/user/check-in-out/month", authCheck, async (req, res) => {
+  const beginMonth = getBeginningOfTheMonth(new Date());
+  const endMonth = getEnddingOfTheMonth(new Date());
+
+  const { id } = req.user;
+  console.log("id", id);
+  try {
+    // console.log(req.user.id);
+    const activity = await Activity.find({
+      userId: { $in: id },
+      checkInTime: {
+        $gt: beginMonth,
+        $lt: endMonth,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
+// @route    GET api/all/check-in-out/week
+// @desc     Get all activity in current week for all user
+// @access   Public (test) / User Only / admin page
+router.get("/all/check-in-out/week", async (req, res) => {
+  const beginWeek = getBeginningOfTheWeek(new Date());
+  const endWeek = getEnddingOfTheWeek(new Date());
+  // const { id } = req.user;
+  // console.log("id", id);
+  try {
+    // console.log(req.user.id);
+    const activity = await Activity.find({
+      // userId: { $in: id },
+      checkInTime: {
+        $gt: beginWeek,
+        $lt: endWeek,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
+// @route    GET api/all/check-in-out-week
+// @desc     Get all activity in current week for all user
+// @access   Public (test) / User Only / admin page
+router.get("/all/check-in-out/day", async (req, res) => {
+  const beginDay = getBeginningOfTheDay(new Date());
+  const endDay = getEndingOfTheDay(new Date());
+  try {
+    const activity = await Activity.find({
+      checkInTime: {
+        $gt: beginDay,
+        $lt: endDay,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
+// @route    GET api/all/check-in-out-week
+// @desc     Get all activity in current week for all user
+// @access   Public (test) / User Only
+router.get("/all/check-in-out/month", async (req, res) => {
+  const beginMonth = getBeginningOfTheMonth(new Date());
+  const endMonth = getEnddingOfTheMonth(new Date());
+  try {
+    const activity = await Activity.find({
+      checkInTime: {
+        $gt: beginMonth,
+        $lt: endMonth,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
 // @route    GET api/user/check-in-out-all
 // @desc     Get all activity in current week for 1 user
 // @access   Public (test) / User Only
+
+// @route    POST api/user/check-in-out-all
+// @desc     Get all activity in current week for 1 user
+// @access   Public (test) / User Only
+// router.post('/user/')
+
+// @route    POST api/user/check-in-out-all
+// @desc     Get all activity in current week for 1 user
+// @access   Public (test) / User Only
+router.delete(
+  "/activity/:activity",
+  // authCheck,
+  // adminCheck,
+  async (req, res) => {
+    console.log("REQ.PARAMS", req.params);
+    console.log("REQ.PARAMS.ACTIVITYID", req.params.activity);
+    try {
+      const activityDeleted = await Activity.findByIdAndRemove(
+        req.params.activity
+      );
+      if (!activityDeleted) {
+        return res.status(404).send("activity Not Found");
+      }
+      res.json(activityDeleted);
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).send("Server Error");
+    }
+  }
+);
 module.exports = router;

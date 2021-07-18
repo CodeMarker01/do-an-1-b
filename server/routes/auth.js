@@ -10,6 +10,9 @@ const {
   signInUser,
   getAllUsers,
   remove,
+  readOne,
+  update,
+  newEmployees,
 } = require("../controllers/auth");
 
 /* GET users listing. */
@@ -87,5 +90,25 @@ router.get("/users/all", authCheck, adminCheck, getAllUsers);
 // @usage    Yes
 //delete product
 router.post("/user/delete", remove);
+
+// @route    GET api/user/:id
+// @desc     Get 1 user base on params userId
+// @access   Public
+// @usage    Yes
+router.get("/user/:id", readOne);
+
+// @route    PUT api/user/:id
+// @desc     Update 1 user based on params userId
+// @access   Admin
+// @usage    Yes
+router.put("/user/:id", authCheck, adminCheck, update);
+// router.put("/user/:id", update);
+
+// @route    PUT api/user/:id
+// @desc     Update 1 user based on params userId
+// @access   Admin
+// @usage    Yes
+router.get("/user/new-employees/week", newEmployees);
+// router.put("/user/:id", update);
 
 module.exports = router;

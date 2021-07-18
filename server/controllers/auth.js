@@ -8,6 +8,11 @@ const User = require("../models/user");
 const Profile = require("../models/Profile");
 const RfidOpenDoor = require("../models/rfidOpenDoor");
 const Activity = require("../models/activity");
+const {
+  getBeginningOfTheDay,
+  getEndingOfTheDay,
+  isValidDate,
+} = require("../utils");
 
 // exports.CreateUser = async (req, res) => {
 //   console.log("REQ USER", req.user);
@@ -54,6 +59,7 @@ exports.createUser = async (req, res) => {
     fingerprint,
     checkInTime,
     checkOutTime,
+    position,
   } = req.body;
 
   const checkInTimeInit = checkInTime ? checkInTime : "not-set";
@@ -87,6 +93,7 @@ exports.createUser = async (req, res) => {
       checkInTime: checkInTimeInit,
       checkOutTime: checkOutTimeInit,
       workingTime,
+      position,
     });
 
     //* Encrypt password
@@ -233,5 +240,146 @@ exports.remove = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(400).send("Product delete failed");
+  }
+};
+
+//* old version
+//* find activity with activityId
+// exports.readOne = async (req, res) => {
+//   const activity = await Activity.findOne({ _id: req.params.id })
+//     .populate("userId", ["name", "email", "avatar", "position", "salary"])
+//     .exec();
+//   console.log(activity);
+//   res.json(activity);
+// };
+
+//todo readOne v2
+exports.readOne = async (req, res) => {
+  console.log(req.query);
+  let { userId, date } = req.query;
+  if (!isValidDate(date)) {
+    date = new Date(date);
+  }
+  console.log(date);
+  const beginDate = getBeginningOfTheDay(date);
+  const endDate = getEndingOfTheDay(date);
+
+  const activity = await Activity.findOne({
+    userId: userId,
+    checkInTime: {
+      $gte: beginDate,
+      $lte: endDate,
+    },
+  })
+    .populate("userId", ["name", "email", "avatar", "position", "salary"])
+    .exec();
+  if (!activity) {
+    const newDate = new Date(date).setHours(0, 0, 0, 0);
+    let newActivity = Activity.findOneAndUpdate(
+      {
+        userId: userId,
+        checkInTime: {
+          $gte: beginDate,
+          $lte: endDate,
+        },
+      },
+      {
+        userId: userId,
+        checkInTime: new Date(newDate),
+        date: new Date(newDate),
+        checkOutTime: null,
+        workingTime: null,
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    )
+      .populate("userId", ["name", "email", "avatar", "position", "salary"])
+      .exec();
+    // await newActivity.save();
+    // newActivity = await newActivity.populate("userId").execPopulate();
+    return res.json(newActivity);
+  }
+  console.log(activity);
+  res.json(activity);
+};
+
+exports.update2 = async (req, res) => {
+  try {
+    // desconstruct user infomation
+    // can phai gui userId va activityId de update 2 ben
+    const { userInfo } = req.body;
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userInfo.userId },
+      userInfo,
+      { new: true }
+    ).exec();
+    const updatedActivity = await Activity.findOneAndUpdate(
+      {
+        _id: userInfo.activityId,
+      },
+      userInfo,
+      { new: true }
+    ).exec();
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(400).json({
+      err: err.message,
+    });
+  }
+};
+
+exports.update = async (req, res) => {
+  console.log(req.body);
+  const { activityObj } = req.body;
+  console.log(
+    "🚀 ~ file: auth.js ~ line 334 ~ exports.update= ~ activityObj",
+    activityObj
+  );
+  const { userId } = activityObj;
+  console.log(
+    "🚀 ~ file: auth.js ~ line 336 ~ exports.update= ~ userId",
+    userId
+  );
+  try {
+    // update User
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId._id,
+      },
+      { $set: userId },
+      { new: true }
+    ).exec();
+    console.log(
+      "🚀 ~ file: auth.js ~ line 351 ~ exports.update= ~ updatedUser",
+      updatedUser
+    );
+
+    const updatedActivity = await Activity.findOneAndUpdate(
+      {
+        _id: activityObj._id,
+      },
+      { $set: activityObj },
+      { new: true }
+    )
+      .populate("userId")
+      .exec();
+    res.json(updatedActivity);
+  } catch (err) {
+    console.log(err.message);
+    res.status(400).json({
+      err: err.message,
+    });
+  }
+};
+
+exports.newEmployees = async (req, res) => {
+  // const user = await User.find({}).sort({'createAt':-1})
+  try {
+    const users = await User.find({}).sort({ createdAt: -1 }).limit(5);
+    console.log(users);
+    res.json(users);
+  } catch (err) {
+    res.status(500).send("Server Error");
   }
 };

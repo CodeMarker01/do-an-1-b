@@ -33,17 +33,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "not-set",
     },
-    checkInTime: {
-      type: String,
-      default: "not-set",
-    },
+    // checkInTime: {
+    //   type: String,
+    //   default: "not-set",
+    // },
     // CheckInDate: String,
-    checkOutTime: {
-      type: String,
-      default: "not-set",
-    },
+    // checkOutTime: {
+    //   type: String,
+    //   default: "not-set",
+    // },
     // CheckOutDate: String,
-    workingTime: String,
+    // workingTime: String,
     salary: {
       type: Number,
       default: 1000000,
@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
     address: String,
+    position: {
+      type: String,
+      default: "Software Engineer",
+    },
     //   wishlist: [{ type: ObjectId, ref: "Product" }],
   },
   { timestamps: true }

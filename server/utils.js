@@ -41,6 +41,24 @@ exports.getEnddingOfTheWeek = (now) => {
   return now;
 };
 
+// get beginning of the month
+exports.getBeginningOfTheMonth = (now) => {
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  return new Date(currentYear, currentMonth - 1, 1);
+  // const days = new Date(currentYear, currentMonth - 1, 1);
+  // return days;
+};
+
+// get beginning of the month
+exports.getEnddingOfTheMonth = (now) => {
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  return new Date(currentYear, currentMonth, 0);
+  // const days = new Date(currentYear, currentMonth, 0);
+  // return days;
+};
+
 //get beginning of the day
 exports.getBeginningOfTheDay = (date) => {
   const dateBegin = date ? new Date(date) : new Date();
@@ -55,6 +73,8 @@ exports.getEndingOfTheDay = (date) => {
   // date.setUTCHours(23, 59, 59, 0);
   return dateEnd;
 };
+
+// get last 12 month
 
 exports.renameKey = (obj, old_key, new_key) => {
   // check if old key = new key
