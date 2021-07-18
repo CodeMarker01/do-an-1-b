@@ -1,4 +1,4 @@
-# Đồ ÁN TỐT NGHIỆP - PHẠM NHẤT SINH - TRẦN ĐĂNG QUANG
+# ĐỒ ÁN TỐT NGHIỆP - PHẠM NHẤT SINH - TRẦN ĐĂNG QUANG
 /** Thiết kế và thi công hệ thống chấm công nhân viên **/
 
 1. Source Code phần nhúng: Embedded/Code/DATN_V2
