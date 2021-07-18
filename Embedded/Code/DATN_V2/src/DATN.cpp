@@ -1,3 +1,9 @@
+/***
+ * Title: Employee attendance system
+ * Autor: Sinh Pham
+ * Support: Quang Tran
+ * Issue: 05/04/2021
+ ***/
 #include <Arduino.h>
 #include <Nextion.h>
 #include <Adafruit_Fingerprint.h>
@@ -18,7 +24,7 @@
 #define BUZZER         13
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-MFRC522 rfid1(SS_PIN1, RST_PIN); // Instance of the class 
+MFRC522 rfid1(SS_PIN1, RST_PIN); 
 RTC_DS1307 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
@@ -37,6 +43,7 @@ void SEND_DATA_STORED();
 void SEND_DATA_CHECK();
 void SEND_DATA_CREATEDOOR();
 void SEND_DATA_CHECKDOOR();
+void SEND_DATA_DELETEUSER();
 
 //NEXTION CONTROL ADD USER PAGE
 NexRtc  RTC;
@@ -78,42 +85,42 @@ NexText text_pkpassad = NexText(8, 1, "t0");
 NexButton button_pkpassad = NexButton(8, 10, "b28");
 
 //PAGE ADD USER 
-NexText text_fing_p4 = NexText(4, 10, "t18"); 
-NexText text_rfid_p4 = NexText(4, 11, "t19"); 
-NexText text_name_p4 = NexText(4, 12, "t20"); 
-NexText text_pos_p4 = NexText(4, 13, "t21"); 
-NexText text_gmail_p4 = NexText(4, 14, "t13"); 
-NexText text_username_p4 = NexText(4, 15, "t14"); 
-NexText text_pass_p4 = NexText(4, 16, "t15"); 
-NexText text_pass2_p4 = NexText(4, 17, "t16"); 
-NexText text_infor_p4 = NexText(4, 28, "t17"); 
+NexText text_fing_p4 = NexText(4, 9, "t18"); 
+NexText text_rfid_p4 = NexText(4, 10, "t19"); 
+NexText text_name_p4 = NexText(4, 11, "t20"); 
+NexText text_pos_p4 = NexText(4, 12, "t21"); 
+NexText text_gmail_p4 = NexText(4, 13, "t13"); 
+//NexText text_username_p4 = NexText(4, 14, "t14"); 
+NexText text_pass_p4 = NexText(4, 14, "t15"); 
+NexText text_pass2_p4 = NexText(4, 15, "t16"); 
+NexText text_infor_p4 = NexText(4, 25, "t17"); 
 
-NexTouch button_fing_p4 = NexButton(4, 18, "m0");
-NexTouch button_rfid_p4 = NexButton(4, 19, "m1");
-NexButton button_exit_p4 = NexButton(4, 26, "b0");
-NexButton button_done_p4 = NexButton(4, 27, "b1");
+NexTouch button_fing_p4 = NexButton(4, 16, "m0");
+NexTouch button_rfid_p4 = NexButton(4, 17, "m1");
+NexButton button_exit_p4 = NexButton(4, 23, "b0");
+NexButton button_done_p4 = NexButton(4, 24, "b1");
 
 //PAGE KEYBOARD ADD USER
 NexText text_dis_pkeyname = NexText(9, 1, "t0"); 
 NexText text_dis_pkeypos = NexText(10, 1, "t0"); 
 NexText text_dis_pkeygmail = NexText(11, 1, "t0"); 
-NexText text_dis_pkeyusername = NexText(12, 1, "t0"); 
-NexText text_dis_pkeypass = NexText(13, 1, "t0"); 
-NexText text_dis_pkeypass2 = NexText(14, 1, "t0"); 
+//NexText text_dis_pkeyusername = NexText(12, 1, "t0"); 
+NexText text_dis_pkeypass = NexText(12, 1, "t0"); 
+NexText text_dis_pkeypass2 = NexText(13, 1, "t0"); 
 
 NexButton button_enter_pkeyname = NexButton(9, 10, "b28");
 NexButton button_enter_pkeypos = NexButton(10, 10, "b28");
 NexButton button_enter_pkeygmail = NexButton(11, 10, "b28");
-NexButton button_enter_pkeyusername = NexButton(12, 10, "b28");
-NexButton button_enter_pkeypass = NexButton(13, 10, "b28");
-NexButton button_enter_pkeypass2 = NexButton(14, 10, "b28");
+//NexButton button_enter_pkeyusername = NexButton(12, 10, "b28");
+NexButton button_enter_pkeypass = NexButton(12, 10, "b28");
+NexButton button_enter_pkeypass2 = NexButton(13, 10, "b28");
 
 //PAGE KEYBOARD DELETE
-NexText text_dis_delall = NexText(15, 1, "t0"); 
-NexText text_dis_delid = NexText(16, 1, "t0");
+NexText text_dis_delall = NexText(14, 1, "t0"); 
+NexText text_dis_delid = NexText(15, 1, "t0");
 NexText text_dis_pdeluser = NexText(5, 4, "t31"); 
-NexButton button_enter_pdelall = NexButton(15, 10, "b28");
-NexButton button_enter_pdelid = NexButton(16, 10, "b28");
+NexButton button_enter_pdelall = NexButton(14, 10, "b28");
+NexButton button_enter_pdelid = NexButton(15, 10, "b28");
 
 //PAGE SET TAG TEMPORARY
 NexText text_rfid_psettemp = NexText(6, 5, "t36"); 
@@ -124,8 +131,8 @@ NexText text_pos_pkeytemp = NexText(17, 1, "t0");
 NexText text_dur_pkeytemp = NexText(18, 1, "t0"); 
 
 NexTouch button_rfid_psettemp = NexButton(6, 8, "m0");
-NexButton button_pos_pkeytemp = NexButton(17, 10, "b28");
-NexButton button_dur_pkeytemp = NexButton(18, 10, "b28");
+NexButton button_pos_pkeytemp = NexButton(16, 10, "b28");
+NexButton button_dur_pkeytemp = NexButton(17, 10, "b28");
 NexButton button_exit_psettemp = NexButton(6, 11, "b0");
 NexButton button_done_psettemp = NexButton(6, 12, "b1");
 
@@ -142,47 +149,38 @@ NexPage page_key_pass_admin = NexPage(8, 0, "key_pass_admin");
 //KHAI BAO BIEN SU DUNG
 int  ID_CHECK, ID_STORED, ID_DEL, CHECK_ID_STORED, SELECT_FP_RFID = 0, ENABLE_OPEN = 0;
 uint32_t   ENA_CHECKIN, ENA_CHECKOUT;
-char ID_CHECK_C[20], ID_STORED_C[20], ID_DEL_C[20], ID_DEL_C2[20], NAME_RESPOND_C[20], Respond_DataCreateUser_C[20], Respond_DataCreateDoor_C[20];
+char ID_CHECK_C[20], ID_STORED_C[20], USERNAME_DEL_C[20], ID_DEL_C[20], ID_DEL_C2[20], NAME_RESPOND_C[20], Respond_DataCreateUser_C[20], Respond_DataCreateDoor_C[20];
 String NAME_RESPOND_S = {};
 String ENABLE_DOOR = {};
+String DELETE_USER_S = {};
 char TIME_ALL[25], TIME[25];
 byte UID_B[4], UIDC_B[4];
-byte moc;
+byte moc, mocDel;
 char UID_C[8], UIDC_C[8]; //15
 uint32_t year1, month1, day1, hour1, minute1, second1, year, month, day, hour, minute, second;
 uint32_t TIME_SET_HMI[7]; //= {2016,11,25,12,34,50};
 
 long previousMillis = 0; 
-char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textusern_p4c[20], textpass_p4c[20], textpass2_p4c[20];
+char textname_p4c[20], textpos_p4c[20],textgmail_p4c[20], textpass_p4c[20], textpass2_p4c[20]; //, textusern_p4c[20]
 char textpos_psettempc[20], textdur_psettempc[20];
 char pass_pkrfidselc[15], pass_pkpassadc[8];
 char pass_pdelallc[8];
-
-unsigned long lastTime = 0; 
-unsigned long timerDelay = 5000;
-
-unsigned long previousMillis1 = 0;
-unsigned long interval = 30000;
-
-int n = 0;
-int humiTest = 321;
-int tempTest = 100;
-double sensorReadingsArr[5];
 
 //KHAI BAO WIFI
 const char *ssid = "TOTOLINK";
 const char *password = "Motdentam";
 const char *serverCreateUser = "http://192.168.0.2:8000/api/create-users";
 const char *serverCreateDoor = "http://192.168.0.2:8000/api/user/create-guest";
-const char *serverCheckUser = "http://192.168.0.2:8000/api/profile/user/check-in-out";  
+const char *serverCheckUser = "http://192.168.0.2:8000/api/user/check-in-out";  
 const char *serverCheckDoor = "http://192.168.0.2:8000/api/user/open-door";
-
+const char *serverDeleteUser = "http://192.168.0.2:8000/api/user/delete";
 /* const char *ssid = "@@";
 const char *password = "0936120886";
 const char *serverCreateUser = "http://172.20.10.4:8000/api/create-users";  
 const char *serverCreateDoor = "http://172.20.10.4:8000/api/user/create-guest"; 
 const char *serverCheckUser = "http://172.20.10.4:8000/api/user/check-in-out";  
-const char *serverCheckDoor = "http://172.20.10.4:8000/api/user/open-door"; */
+const char *serverCheckDoor = "http://172.20.10.4:8000/api/user/open-door"; 
+const char *serverDeleteUser = "http://192.168.2.224:8000/api/user/delete"; */
 
 //KHAI BAO DOI TUONG CHAM
 NexTouch *nex_listen_list[] = 
@@ -198,7 +196,7 @@ NexTouch *nex_listen_list[] =
   &button_enter_pkeyname,
   &button_enter_pkeypos,
   &button_enter_pkeygmail,
-  &button_enter_pkeyusername,
+  //&button_enter_pkeyusername,
   &button_enter_pkeypass,
   &button_enter_pkeypass2,
   &button_exit_p4,
@@ -269,7 +267,7 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
 
   if(ID_CHECK == 0) //65406
   {
-    text_inforname_p2.setText("ID ERROR");  // NOT ENTER ERROR
+    text_inforname_p2.setText("ID ERROR");  
     delay(1000);
   }
   else 
@@ -283,7 +281,6 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
   ID_CHECK = 0;
   //text_state_p2.setText("SELECT MODE");
   page1.show();
-  
 }
 
 void button_pkrfidsel_PopCallback(void *ptr)
@@ -344,7 +341,7 @@ void button_pkpassad_PopCallback(void *ptr)
 void button_install_p3_PopCallback(void *ptr)
 {
   GET_TIME();
-  uint32_t TIME_SET_HMI[7] = {year1, month1, day1, hour1, minute1, second1};   //=  = {2016,11,25,12,34,50};
+  uint32_t TIME_SET_HMI[7] = {year1, month1, day1, hour1, minute1, second1};  
   RTC.write_rtc_time(TIME_SET_HMI);
   BUZZER_SWITCH(50);
 }
@@ -420,14 +417,14 @@ void bgmailp7_PopCallback(void *ptr)
   page4.show();
   text_gmail_p4.setText(textgmail_p4c); 
 }
-void benter_pkeyusername_PopCallback(void *ptr)
+/* void benter_pkeyusername_PopCallback(void *ptr)
 {
   text_dis_pkeyusername.getText(textusern_p4c, 20);
   Serial.println(textusern_p4c);
   text_dis_pkeyusername.setText(NULL);
   page4.show();
   text_username_p4.setText(textusern_p4c); 
-}
+} */
 void bpassp8_PopCallback(void *ptr)
 {
   text_dis_pkeypass.getText(textpass_p4c, 20);
@@ -465,7 +462,7 @@ void bexitp4_PopCallback(void *ptr)
   memset(textname_p4c, 0, int(20));
   memset(textpos_p4c, 0, int(20));
   memset(textgmail_p4c, 0, int(20));
-  memset(textusern_p4c, 0, int(20));
+  //memset(textusern_p4c, 0, int(20));
   memset(textpass_p4c, 0, int(20));
   memset(textpass2_p4c, 0, int(20));
   text_fing_p4.setText(NULL);
@@ -473,15 +470,15 @@ void bexitp4_PopCallback(void *ptr)
   text_name_p4.setText(NULL);
   text_pos_p4.setText(NULL);
   text_gmail_p4.setText(NULL);
-  text_username_p4.setText(NULL);
+  //text_username_p4.setText(NULL);
   text_pass_p4.setText(NULL); 
   text_pass2_p4.setText(NULL); 
   page3.show();  
 }
 void bdonep4_PopCallback(void *ptr)
 {
-  if( (ID_STORED != 0) && (String(UID_C) != NULL) && (String(textname_p4c) != NULL) && (String(textpos_p4c) != NULL) && (String(textgmail_p4c) != NULL) 
-    && (String(textusern_p4c) != NULL) && (String(textpass_p4c) != NULL) && (String(textpass2_p4c) != NULL) )
+  if( (ID_STORED != 0) && (String(UID_C) != NULL) && (String(textname_p4c) != NULL) && (String(textpos_p4c) != NULL) 
+  && (String(textgmail_p4c) != NULL) && (String(textpass_p4c) != NULL) && (String(textpass2_p4c) != NULL) )
   {
     SEND_DATA_STORED();
     SEND_DATA_CREATEDOOR();
@@ -495,7 +492,7 @@ void bdonep4_PopCallback(void *ptr)
     memset(textname_p4c, 0, int(20));
     memset(textpos_p4c, 0, int(20));
     memset(textgmail_p4c, 0, int(20));
-    memset(textusern_p4c, 0, int(20));
+    //memset(textusern_p4c, 0, int(20));
     memset(textpass_p4c, 0, int(20));
     memset(textpass2_p4c, 0, int(20));
     memset(Respond_DataCreateUser_C, 0, int(20));
@@ -505,7 +502,7 @@ void bdonep4_PopCallback(void *ptr)
     text_name_p4.setText(NULL);
     text_pos_p4.setText(NULL);
     text_gmail_p4.setText(NULL);
-    text_username_p4.setText(NULL);
+    //text_username_p4.setText(NULL);
     text_pass_p4.setText(NULL); 
     text_pass2_p4.setText(NULL); 
     page3.show(); 
@@ -526,9 +523,9 @@ void benter_pdelall_PopCallback(void *ptr)
   Serial.println(String(pass_pdelallc));
   if( (String(pass_pdelallc) == "12345678") || (String(pass_pdelallc) == "87654321"))
   {
+    page5.show();
     finger.emptyDatabase();
     Serial.println("Now database is empty :)");
-    page5.show();
     text_dis_pdeluser.setText("DATABASE IS EMPTY");
     BUZZER_NOTIFICATION(200);
     delay(1000);
@@ -552,13 +549,15 @@ void benter_pdelall_PopCallback(void *ptr)
 }
 void benter_pdelid_PopCallback(void *ptr)   
 {
-  text_dis_delid.getText(ID_DEL_C, 20);
-  text_dis_delid.setText(NULL);
-  Serial.println(String(ID_DEL_C));
+  text_dis_delid.getText(USERNAME_DEL_C, 20);
+  //text_dis_delid.setText(NULL);
+  SEND_DATA_DELETEUSER();
+  Serial.println(ID_DEL_C);
   ID_DEL = atoi(ID_DEL_C),  
   deleteFingerprint(ID_DEL);
   page5.show();
-  sprintf(ID_DEL_C2, "DELETED ID %d", ID_DEL);
+  sprintf(ID_DEL_C2, "DELETED USER: %s", String(USERNAME_DEL_C));
+  Serial.println(ID_DEL_C2);
   text_dis_pdeluser.setText(ID_DEL_C2);
   BUZZER_NOTIFICATION(200);
   delay(1000);
@@ -657,7 +656,7 @@ void setup()
   button_install_p3.attachPop(button_install_p3_PopCallback, &button_install_p3);
   button_enter_pkeypos.attachPop(bposp6_PopCallback, &button_enter_pkeypos);
   button_enter_pkeygmail.attachPop(bgmailp7_PopCallback, &button_enter_pkeygmail);
-  button_enter_pkeyusername.attachPop(benter_pkeyusername_PopCallback, &button_enter_pkeyusername);
+  //button_enter_pkeyusername.attachPop(benter_pkeyusername_PopCallback, &button_enter_pkeyusername);
   button_enter_pkeypass.attachPop(bpassp8_PopCallback, &button_enter_pkeypass);
   button_enter_pkeypass2.attachPop(bpass2p8_PopCallback, &button_enter_pkeypass2);
   button_exit_p4.attachPop(bexitp4_PopCallback, &button_exit_p4);
@@ -776,8 +775,8 @@ void BUZZER_NOTIFICATION(int dl)
 
 void READ_RFID()
 {
-  SPI.begin(); // Init SPI bus
-  mfrc522.PCD_Init(); // Init MFRC522  
+  SPI.begin(); 
+  mfrc522.PCD_Init(); 
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
@@ -813,8 +812,8 @@ void READ_RFID()
 
 void READ_RFID1()
 {
-  SPI.begin(); // Init SPI bus
-  mfrc522.PCD_Init(); // Init MFRC522  
+  SPI.begin(); 
+  mfrc522.PCD_Init(); 
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
@@ -1149,7 +1148,7 @@ void SEND_DATA_CHECK()
     JSONVar keys1 = ObjectRecive_In.keys();                 // STEP2
     JSONVar valueKey1 = ObjectRecive_In[keys1[0]];          // STEP3
     JSONVar keys2 = valueKey1.keys();
-    JSONVar valueName = valueKey1[keys2[8]];
+    JSONVar valueName = valueKey1[keys2[9]];
     NAME_RESPOND_S = JSON.stringify(valueName); ///Convert the json to a String 
 
     NAME_RESPOND_S.remove(0,1);   //REMOVE ""
@@ -1217,7 +1216,7 @@ void SEND_DATA_CHECK()
       JSONVar keys3 = ObjectRecive_Out.keys();                 // STEP2
       JSONVar valueKey3 = ObjectRecive_Out[keys3[0]];          // STEP3
       JSONVar keys4 = valueKey3.keys();
-      JSONVar valueName = valueKey3[keys4[8]];
+      JSONVar valueName = valueKey3[keys4[9]];
       NAME_RESPOND_S = JSON.stringify(valueName); ///Convert the json to a String 
   
       NAME_RESPOND_S.remove(0,1);   //REMOVE ""
@@ -1298,6 +1297,47 @@ void SEND_DATA_CHECKDOOR()
   {
     Serial.print("Error code POST EMBEDDED: ");
     Serial.println(httpResponse_CheckDoor);
+  }
+  http.end(); 
+}
+void SEND_DATA_DELETEUSER()
+{
+  HTTPClient http;
+  http.begin(serverDeleteUser);
+  String dataDeleteUser = String("{\"name\":\"") + USERNAME_DEL_C + String("\"}"); 
+  http.addHeader("Content-Type", "application/json");
+  int httpResponse_DeleteUser = http.POST(dataDeleteUser); // GUI DATA LEN SERVER  
+  String StringRecive_DeleteUser = "{}"; 
+  if (httpResponse_DeleteUser == 200) //GET DATA
+  {
+    Serial.print("HTTP Response Delete User: ");
+    Serial.println(httpResponse_DeleteUser); //SEND DATA
+    StringRecive_DeleteUser = http.getString();
+    Serial.println(StringRecive_DeleteUser);  //GET RESPONDE
+    // -------------------------------------- PROCESS JSON -----------------------------------------------//
+    JSONVar ObjectRecive_DeleteUser = JSON.parse(StringRecive_DeleteUser);  // STEP1
+    JSONVar keysDeleteUser = ObjectRecive_DeleteUser.keys();                 // STEP2
+    JSONVar valueDeleteUser = ObjectRecive_DeleteUser[keysDeleteUser[2]];          // STEP3
+    DELETE_USER_S = JSON.stringify(valueDeleteUser); ///Convert the json to a String 
+    Serial.print("DELETE USER: ");
+    Serial.println(DELETE_USER_S);
+
+    DELETE_USER_S.remove(0,1);   //REMOVE ""
+    for (int i = 0; i < DELETE_USER_S.length(); i++) 
+    {
+        if (DELETE_USER_S.charAt(i) == '"') 
+        {
+            mocDel = i; 
+        }
+    }
+    NAME_RESPOND_S.remove(mocDel,DELETE_USER_S.length()-mocDel); //vi tri, so luong
+    Serial.println(DELETE_USER_S);   
+    DELETE_USER_S.toCharArray(ID_DEL_C, sizeof(DELETE_USER_S));
+  }
+  else //ERROR
+  {
+    Serial.print("Error code POST EMBEDDED: ");
+    Serial.println(httpResponse_DeleteUser);
   }
   http.end(); 
 }

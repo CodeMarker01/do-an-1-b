@@ -1,2 +1,3 @@
-1. R305 giao tiếp ESP32 qua UART2: sửa lại nextionSerial: Serial1 (trong NextionCong).
-2. HMI giao tiếp ESP32 qua UART1: sửa lại TX: 2 - RX: 4 (trong HardwareSerial.cpp).
+1. R305 giao tiếp ESP32 qua UART2: sửa lại TX: 2 - RX: 4 (trong HardwareSerial.cpp).
+2. HMI giao tiếp ESP32 qua UART1: sửa lại nextionSerial: Serial1 (trong NextionCong).
+				  xóa nexupdate trong lib nextion
