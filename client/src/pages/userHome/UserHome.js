@@ -71,16 +71,6 @@ const UserHome = () => {
           : 0,
     };
   });
-  // console.log(
-  //   "🚀 ~ file: UserHome.js ~ line 69 ~ userData3Filter ~ userData3Filter",
-  //   userData3Filter
-  // );
-
-  // console.log("useState userData3", userData3);
-  // console.log(
-  //   "🚀 ~ file: UserHome.js ~ line 51 ~ userData3Filter ~ userData3Filter",
-  //   userData3Filter
-  // );
 
   // userData3Chart = userData3Chart.map((u, index) => {
   //   console.log("u", u.name);
@@ -96,23 +86,13 @@ const UserHome = () => {
   //     }
   //   }
   // }
-  // console.log(
-  //   "🚀 ~ file: UserHome.js ~ line 81 ~ UserHome ~ userData3Chart",
-  //   userData3Chart
-  // );
-  // console.log(
-  //   "🚀 ~ file: UserHome.js ~ line 84 ~ UserHome ~ userData3Filter",
-  //   userData3Filter
-  // );
-  // console.log(
-  //   "🚀 ~ file: UserHome.js ~ line 107 ~ UserHome ~ userData2",
-  //   userData2
-  // );
 
   for (let chart of userData3Chart) {
     for (let filter of userData3Filter) {
       if (chart.name === filter.name) {
-        chart.Worked = parseFloat(filter.Worked).toFixed(1);
+        // chart.Worked = parseFloat(filter.Worked).toFixed(1);
+        chart.Worked = Math.round(filter.Worked * 10) / 10;
+        // Math.round(num * 100) / 100
         break;
       } else {
         chart.Worked = 0;

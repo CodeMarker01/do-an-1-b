@@ -52,21 +52,37 @@ export default function Topbar() {
         </div>
         {isAuthenticated && (
           <div className="topRight">
-            <div className="topbarIconContainer">
+            <div
+              className={`topbarIconContainer ${
+                pathname === "/" ? "colorLogoForLandingPage" : ""
+              }`}
+            >
               <NotificationsNone />
               <span className="topIconBadge">2</span>
             </div>
-            <div className="topbarIconContainer">
+            <div
+              className={`topbarIconContainer ${
+                pathname === "/" ? "colorLogoForLandingPage" : ""
+              }`}
+            >
               <Language />
               <span className="topIconBadge">2</span>
             </div>
-            <div className="topbarIconContainer">
+            <div
+              className={`topbarIconContainer ${
+                pathname === "/" ? "colorLogoForLandingPage" : ""
+              }`}
+            >
               <Settings />
             </div>
             <div className="topbarUserContainer">
               <img src={user?.avatar} alt="" className="topAvatar" />
               <div className="topbarUserDropdown">
-                <button className="dropbtn">
+                <button
+                  className={`dropbtn ${
+                    pathname === "/" ? "colorLogoForLandingPage" : ""
+                  }`}
+                >
                   Hi <span>{user?.name}</span>
                 </button>
                 <div class="dropdown-content">

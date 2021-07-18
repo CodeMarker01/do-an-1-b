@@ -36,3 +36,19 @@ export const LoadActivityUserData = () => async (dispatch) => {
 //
 export const loadActivityUserWeek = async () =>
   await api.get("/user/check-in-out/week");
+
+// get 1 user and activity in current month
+export const loadActivityUserMonth = async () =>
+  await api.get("/user/check-in-out/month");
+
+// get all user and activity in current week
+export const loadActivityAdminWeek = async () =>
+  await api.get("/all/check-in-out/week");
+
+// get all user and activity on today
+export const loadActivityAdminDay = async () =>
+  await api.get("/all/check-in-out/day");
+
+// get all user and activity in current month
+export const loadActivityAdminMonth = async () =>
+  await api.get("/all/check-in-out/month");

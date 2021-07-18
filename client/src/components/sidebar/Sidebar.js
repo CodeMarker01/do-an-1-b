@@ -13,12 +13,19 @@ import {
   WorkOutline,
   Report,
 } from "@material-ui/icons";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export default function Sidebar() {
   //redux auth
   const { user } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const { pathname } = location;
+  const splitLocation = pathname.split("/");
+  console.log(
+    "🚀 ~ file: Sidebar.js ~ line 25 ~ Sidebar ~ splitLocation",
+    splitLocation
+  );
   let directToPage;
   if (user?.role === "admin") {
     directToPage = "/dashboard";
@@ -34,17 +41,28 @@ export default function Sidebar() {
           <h3 className="sidebarTitle">Dashboard</h3>
           <ul className="sidebarList">
             <Link to={directToPage} className="link">
-              <li className="sidebarListItem active">
+              <li
+                className={`sidebarListItem ${
+                  splitLocation[1] === "dashboard" ? "active" : ""
+                }`}
+              >
                 <LineStyle className="sidebarIcon" />
                 Home
               </li>
             </Link>
-            <Link to="/users" className="link">
-              <li className="sidebarListItem">
-                <PermIdentity className="sidebarIcon" />
-                Users
-              </li>
-            </Link>
+
+            {user.role === "admin" && (
+              <Link to="/users" className="link">
+                <li
+                  className={`sidebarListItem ${
+                    splitLocation[1] === "users" ? "active" : ""
+                  }`}
+                >
+                  <PermIdentity className="sidebarIcon" />
+                  Users
+                </li>
+              </Link>
+            )}
             {/* <li className="sidebarListItem">
               <Timeline className="sidebarIcon" />
               Analytics

@@ -44,3 +44,37 @@ export const getEndingOfTheDay = (date) => {
   // date.setUTCHours(23, 59, 59, 0);
   return dateEnd;
 };
+
+// get beginning of the week
+export const getBeginningOfTheWeek = (now) => {
+  const days = (now.getDay() + 7 - 1) % 7;
+  now.setDate(now.getDate() - days);
+  now.setHours(0, 0, 0, 0);
+  return now;
+};
+
+// get beginning of the week
+export const getEnddingOfTheWeek = (now) => {
+  const days = (now.getDay() + 7 - 1) % 7;
+  now.setDate(now.getDate() - days + 6);
+  now.setHours(23, 59, 59, 0);
+  return now;
+};
+
+// get beginning of the month
+export const getBeginningOfTheMonth = (now) => {
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  return new Date(currentYear, currentMonth - 1, 1);
+  // const days = new Date(currentYear, currentMonth - 1, 1);
+  // return days;
+};
+
+// get beginning of the month
+export const getEnddingOfTheMonth = (now) => {
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  return new Date(currentYear, currentMonth, 0);
+  // const days = new Date(currentYear, currentMonth, 0);
+  // return days;
+};

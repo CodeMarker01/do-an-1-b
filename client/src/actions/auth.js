@@ -113,3 +113,7 @@ export const login = (email, password) => async (dispatch) => {
 
 // Logout
 export const logout = () => ({ type: LOGOUT });
+
+// Get user within a week
+export const loadNewUserWeek = async () =>
+  await api.get("/user/new-employees/week");

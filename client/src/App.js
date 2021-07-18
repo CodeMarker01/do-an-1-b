@@ -6,6 +6,7 @@ import Sidebar from "./components/sidebar/Sidebar";
 import Home from "./pages/home/Home";
 import UserHome from "./pages/userHome/UserHome";
 import UserList from "./pages/userList/UserList";
+import User from "./pages/user/User";
 import Landing from "./pages/landing/Landing";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
@@ -21,6 +22,9 @@ import History from "./pages/history";
 import UserRoute from "./components/routes/UserRoute";
 import AdminRoute from "./components/routes/AdminRoute";
 import { LoadActivityUserData, loadActivityUserWeek } from "./actions/activity";
+//toast
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const { res } = LoadActivityUserData();
@@ -41,6 +45,7 @@ const App = () => {
   return (
     <div class="app">
       <Router>
+        {/* <ToastContainer /> */}
         <Topbar />
         <Switch>
           <Route exact path="/">
@@ -49,6 +54,7 @@ const App = () => {
           <>
             <div className="container-udm">
               <Alert />
+              <ToastContainer />
               <Switch>
                 <Route exact path="/login">
                   <Login />
@@ -64,12 +70,20 @@ const App = () => {
             {/* <div className="container-udm"></div> */}
             <div className="container admin-layout">
               <Switch>
+                {/* <Sidebar /> */}
+
                 {/* <Route exact path="/register" component={Register} /> */}
                 {/* <Route exact path="/login" component={Login} /> */}
                 <AdminRoute exact path="/dashboard">
                   <Sidebar />
                   <Home />
                 </AdminRoute>
+                <UserRoute path="/user/:userQuery">
+                  <Sidebar />
+                  <User />
+                </UserRoute>
+                {/* <AdminRoute exact path="/user/:userId" component={User} /> */}
+
                 {/* <UserRoute exact path="/dashboard">
                 <Sidebar />
                 <Home />
