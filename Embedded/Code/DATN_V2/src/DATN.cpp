@@ -17,8 +17,8 @@
 #include <EEPROM.h>
 
 #define RST_PIN        14
-#define SS_PIN1         15
-#define SS_PIN        26
+#define SS_PIN1        15
+#define SS_PIN         26
 #define SENSOR_DOOR    34
 #define RELAY          33
 #define BUZZER         13
@@ -75,6 +75,7 @@ NexButton button_rfid_p2 = NexButton(2, 3, "b1");
 
 //PAGE 3
 NexButton button_install_p3 = NexButton(3, 7, "b3");
+NexButton button_exitdoor_p3 = NexButton(3, 8, "b4");
 
 //PAGE key_rfid_select 
 NexText text_pkrfidsel = NexText(7, 1, "t0");
@@ -147,7 +148,7 @@ NexPage page6 = NexPage(6,0,"set_temp");
 NexPage page_key_pass_admin = NexPage(8, 0, "key_pass_admin");
 
 //KHAI BAO BIEN SU DUNG
-int  ID_CHECK, ID_STORED, ID_DEL, CHECK_ID_STORED, SELECT_FP_RFID = 0, ENABLE_OPEN = 0;
+int  ID_CHECK, ID_STORED, ID_DEL, CHECK_ID_STORED, SELECT_FP_RFID = 0, ENABLE_OPEN = 0, ENA_EXITDOOR = 0;
 uint32_t   ENA_CHECKIN, ENA_CHECKOUT;
 char ID_CHECK_C[20], ID_STORED_C[20], USERNAME_DEL_C[20], ID_DEL_C[20], ID_DEL_C2[20], NAME_RESPOND_C[20], Respond_DataCreateUser_C[20], Respond_DataCreateDoor_C[20];
 String NAME_RESPOND_S = {};
@@ -169,13 +170,14 @@ char pass_pdelallc[8];
 //KHAI BAO WIFI
 const char *ssid = "TOTOLINK";
 const char *password = "Motdentam";
-const char *serverCreateUser = "http://192.168.0.2:8000/api/create-users";
-const char *serverCreateDoor = "http://192.168.0.2:8000/api/user/create-guest";
-const char *serverCheckUser = "http://192.168.0.2:8000/api/user/check-in-out";  
-const char *serverCheckDoor = "http://192.168.0.2:8000/api/user/open-door";
-const char *serverDeleteUser = "http://192.168.0.2:8000/api/user/delete";
+const char *serverCreateUser = "http://192.168.0.3:8000/api/create-users";
+const char *serverCreateDoor = "http://192.168.0.3:8000/api/user/create-guest";
+const char *serverCheckUser = "http://192.168.0.3:8000/api/user/check-in-out";  
+const char *serverCheckDoor = "http://192.168.0.3:8000/api/user/open-door";
+const char *serverDeleteUser = "http://192.168.0.3:8000/api/user/delete";
+
 /* const char *ssid = "@@";
-const char *password = "0936120886";
+const char *password = "12345678";
 const char *serverCreateUser = "http://172.20.10.4:8000/api/create-users";  
 const char *serverCreateDoor = "http://172.20.10.4:8000/api/user/create-guest"; 
 const char *serverCheckUser = "http://172.20.10.4:8000/api/user/check-in-out";  
@@ -191,6 +193,7 @@ NexTouch *nex_listen_list[] =
   &button_fing_p2,
   &button_rfid_p2,
   &button_install_p3,
+  &button_exitdoor_p3,
   &button_fing_p4,
   &button_rfid_p4,
   &button_enter_pkeyname,
@@ -215,7 +218,6 @@ NexTouch *nex_listen_list[] =
 
 void touch_switchpage_p0_PopCallback(void *ptr)
 {
-  page1.show();
   //RECONNECT WIFI
   if (WiFi.status() != WL_CONNECTED) 
   {
@@ -229,6 +231,7 @@ void touch_switchpage_p0_PopCallback(void *ptr)
     text_connect_p0.setText("CONNECT: OK");
     Serial.println("+++++++++++++ok+++++++++++++++++++");
   }
+  page1.show();
 }
 void button_admin_p1_PopCallback(void *ptr)
 {
@@ -261,14 +264,13 @@ void bfingp2PopCallback(void *ptr) //CHECK ID
   while(millis() < time_now + 5000)
   {
     getFingerprintIDez();
-    sprintf(ID_CHECK_C, "ID LA %d", ID_CHECK);
+    //sprintf(ID_CHECK_C, "ID LA %d", ID_CHECK);
   } 
   Serial.println(ID_CHECK_C);
-
   if(ID_CHECK == 0) //65406
   {
     text_inforname_p2.setText("ID ERROR");  
-    delay(1000);
+    delay(1500);
   }
   else 
   { 
@@ -289,11 +291,10 @@ void button_pkrfidsel_PopCallback(void *ptr)
   text_pkrfidsel.getText(pass_pkrfidselc, 20);
   text_pkrfidsel.setText(NULL);
   Serial.println(String(pass_pkrfidselc)); 
-  if( (String(pass_pkrfidselc) == "FINGER ERROR") || (String(pass_pkrfidselc) == "TEMPORARY"))
+  if( (String(pass_pkrfidselc) == "FINGERPRINT ERROR") || (String(pass_pkrfidselc) == "SYSTEM ERROR"))
   {    
     page2.show();
     SELECT_FP_RFID = 2;
-    Serial.println("RFID");
     text_state_p2.setText("ENTER YOUR TAG RFID");
     unsigned long  time_now = millis();   
     while(millis() < time_now + 5000)
@@ -344,6 +345,11 @@ void button_install_p3_PopCallback(void *ptr)
   uint32_t TIME_SET_HMI[7] = {year1, month1, day1, hour1, minute1, second1};  
   RTC.write_rtc_time(TIME_SET_HMI);
   BUZZER_SWITCH(50);
+}
+void button_exitdoor_p3_PopCallback(void *ptr)
+{
+  ENA_EXITDOOR = ENA_EXITDOOR + 1;
+  if(ENA_EXITDOOR == 2) ENA_EXITDOOR = 0;
 }
 void bfingp4_PopCallback(void *ptr) //gui id len
 {
@@ -446,7 +452,8 @@ void bpass2p8_PopCallback(void *ptr)
   }
   else
   {
-    text_pass2_p4.setText("PASSWORD INCORRECT"); 
+    //text_pass2_p4.setText("PASSWORD INCORRECT"); 
+    text_infor_p4.setText("PASSWORD INCORRECT");
     memset(textpass2_p4c, 0, int(20));
     Serial.println("PASS1: ");
     Serial.println(textpass_p4c);
@@ -530,7 +537,6 @@ void benter_pdelall_PopCallback(void *ptr)
     BUZZER_NOTIFICATION(200);
     delay(1000);
     text_dis_pdeluser.setText(NULL);
-
     //DELETE EEPROM
     for (int i = 0; i < 512; i++) 
     {
@@ -550,19 +556,30 @@ void benter_pdelall_PopCallback(void *ptr)
 void benter_pdelid_PopCallback(void *ptr)   
 {
   text_dis_delid.getText(USERNAME_DEL_C, 20);
-  //text_dis_delid.setText(NULL);
   SEND_DATA_DELETEUSER();
-  Serial.println(ID_DEL_C);
-  ID_DEL = atoi(ID_DEL_C),  
-  deleteFingerprint(ID_DEL);
-  page5.show();
-  sprintf(ID_DEL_C2, "DELETED USER: %s", String(USERNAME_DEL_C));
-  Serial.println(ID_DEL_C2);
-  text_dis_pdeluser.setText(ID_DEL_C2);
-  BUZZER_NOTIFICATION(200);
-  delay(1000);
-  text_dis_pdeluser.setText(NULL);
-  memset(ID_DEL_C, 0, int(20));
+  if(String(USERNAME_DEL_C) != NULL)
+  {
+    Serial.println(ID_DEL_C);
+    ID_DEL = atoi(ID_DEL_C),  
+    deleteFingerprint(ID_DEL);
+    page5.show();
+    sprintf(ID_DEL_C2, "DELETED USER: %s", String(USERNAME_DEL_C));
+    Serial.println(ID_DEL_C2);
+    text_dis_pdeluser.setText(ID_DEL_C2);
+    BUZZER_NOTIFICATION(200);
+    delay(1000);
+    text_dis_pdeluser.setText(NULL);
+    memset(ID_DEL_C, 0, int(20));
+  }
+  else 
+  {
+    page5.show();
+    //memset(USERNAME_DEL_C, NULL, int(20));
+    text_dis_pdeluser.setText("DELETE USER ERROR");
+    delay(1500);
+    text_dis_pdeluser.setText(NULL);
+  }
+
 }
 
 //PAGE SET TEMPORARY
@@ -640,6 +657,22 @@ void setup()
   mfrc522.PCD_Init();
   delay(5);
   nexInit();
+
+  //WIFI
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+    text_connect_p0.setText("CONNECT: ERROR");
+  }
+  text_connect_p0.setText("CONNECT: OK");
+  Serial.println("");
+  Serial.print("Connected to WiFi network with IP Address: ");
+  Serial.println(WiFi.localIP());
+  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+
   EEPROM.begin(512);
   EEPROM.commit();
   pinMode(RELAY, OUTPUT);
@@ -654,6 +687,7 @@ void setup()
   button_rfid_p4.attachPop(brfidp4_PopCallback, &button_rfid_p4);
   button_enter_pkeyname.attachPop(bnamep5_PopCallback, &button_enter_pkeyname);
   button_install_p3.attachPop(button_install_p3_PopCallback, &button_install_p3);
+  button_exitdoor_p3.attachPop(button_exitdoor_p3_PopCallback, &button_exitdoor_p3);
   button_enter_pkeypos.attachPop(bposp6_PopCallback, &button_enter_pkeypos);
   button_enter_pkeygmail.attachPop(bgmailp7_PopCallback, &button_enter_pkeygmail);
   //button_enter_pkeyusername.attachPop(benter_pkeyusername_PopCallback, &button_enter_pkeyusername);
@@ -694,19 +728,21 @@ void setup()
   //rtc.adjust(DateTime(2021, 6, 17, 15, 42, 0)); // YEAR/MON/DAY/HOUR/MINUTE/SECOND
   //RTC.write_rtc_time(TIME_SET_HMI);
 //WIFI
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting");
-  while (WiFi.status() != WL_CONNECTED)
+//WiFi.begin(ssid, password);
+/*   if (WiFi.status() != WL_CONNECTED) 
   {
-    delay(500);
-    Serial.print(".");
-    text_connect_p0.setText("CONNECT: ERROR");
+    WiFi.reconnect();
+    delay(50);
+    Serial.println("Reconnect");
+    delay(1000);
   }
-  text_connect_p0.setText("CONNECT: OK");
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
-  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  else 
+  {
+    Serial.println("Connecting...");
+    delay(1000);
+  } */
+
+
   ENABLE_DOOR = "0";
   digitalWrite(RELAY, HIGH); //OPEN
 }
@@ -727,26 +763,33 @@ void loop()
     Serial.println("HAVE CARD"); 
   }
   /* OPEN - CLOSE DOOR*/
-  if(ENABLE_DOOR == "1" && digitalRead(SENSOR_DOOR) == 0)
+  if(ENA_EXITDOOR == 1)
   {
-    digitalWrite(RELAY, LOW); //OPEN
-    Serial.println("OPEN DOOR");
-    ENABLE_OPEN = 1;
-    ENABLE_DOOR = "0";
-  }
-  else if(ENABLE_OPEN == 1 && digitalRead(SENSOR_DOOR) == 0) //MAINTAIN
+      digitalWrite(RELAY, LOW); //OPEN
+      Serial.println("OPEN DOOR");
+  } 
+  else if(ENA_EXITDOOR == 0)
   {
-    digitalWrite(RELAY, LOW); //OPEN
-    Serial.println("OPEN DOOR");
+    if(ENABLE_DOOR == "1" && digitalRead(SENSOR_DOOR) == 0)
+    {
+      digitalWrite(RELAY, LOW); //OPEN
+      Serial.println("OPEN DOOR");
+      ENABLE_OPEN = 1;
+      ENABLE_DOOR = "0";
+    }
+    else if(ENABLE_OPEN == 1 && digitalRead(SENSOR_DOOR) == 0) //MAINTAIN
+    {
+      digitalWrite(RELAY, LOW); //OPEN
+      Serial.println("OPEN DOOR");
+    }
+    else if(digitalRead(SENSOR_DOOR) == 1)
+    {
+      digitalWrite(RELAY, HIGH); //CLOSE
+      Serial.println("CLOSE DOOR");
+      ENABLE_OPEN = 0;
+      ENABLE_DOOR = "0";
+    }
   }
-  else if(digitalRead(SENSOR_DOOR) == 1)
-  {
-    digitalWrite(RELAY, HIGH); //CLOSE
-    Serial.println("CLOSE DOOR");
-    ENABLE_OPEN = 0;
-    ENABLE_DOOR = "0";
-  }
-  
   // LOOP NEXTION
   if(millis() - previousMillis >= 1000)
   {
@@ -1167,7 +1210,7 @@ void SEND_DATA_CHECK()
     text_inforname_p2.setText( strcat(NAME_RESPOND_C, ": Check In Success") );
     text_infortime_p2.setText(TIME_ALL);
     BUZZER_SWITCH(50);
-    delay(2000);
+    delay(2500);
     }
     else //ERROR
     {
@@ -1235,7 +1278,7 @@ void SEND_DATA_CHECK()
       text_inforname_p2.setText( strcat(NAME_RESPOND_C, ": Check Out Success") );
       text_infortime_p2.setText(TIME_ALL);
       BUZZER_SWITCH(50);
-      delay(2000);
+      delay(2500);
     }
     else //ERROR
     {
@@ -1336,6 +1379,7 @@ void SEND_DATA_DELETEUSER()
   }
   else //ERROR
   {
+    memset(USERNAME_DEL_C, NULL, int(20));
     Serial.print("Error code POST EMBEDDED: ");
     Serial.println(httpResponse_DeleteUser);
   }
