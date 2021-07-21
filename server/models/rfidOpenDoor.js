@@ -30,6 +30,10 @@ const rfidOpenDoorSchema = new mongoose.Schema(
       type: String,
       default: "not-set",
     },
+    expireTime: {
+      type: Number,
+      default: 60000,
+    },
   },
   { timestamps: true }
 );
