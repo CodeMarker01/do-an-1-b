@@ -26,7 +26,6 @@ export default function User() {
   console.log("🚀 ~ file: User.js ~ line 22 ~ User ~ loading", loading);
   //   const [dateAdmin, setDateAdmin] = useState();
   const history = useHistory();
-  //   console.log("🚀 ~ file: User.js ~ line 20 ~ User ~ history", history);
 
   //   const { userId } = useParams();
   const urlSearchParams = new URLSearchParams(useLocation().search);
