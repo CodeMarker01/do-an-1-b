@@ -343,6 +343,7 @@ exports.update = async (req, res) => {
   );
   try {
     // update User
+    console.log("activityObj.checkInTime", activityObj.checkInTime);
     const updatedUser = await User.findOneAndUpdate(
       {
         _id: userId._id,

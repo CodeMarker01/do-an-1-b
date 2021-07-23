@@ -159,3 +159,22 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Chart and export btn */
+.exportSection {
+  position: relative;
+}
+.userChart {
+  position: relative;
+}
+
+.exportBtn {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 20px;
+  /* padding: auto 2rem; */
+  width: 144px;
+  text-align: center;
+}
