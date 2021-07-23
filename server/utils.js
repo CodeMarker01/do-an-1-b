@@ -88,3 +88,16 @@ exports.renameKey = (obj, old_key, new_key) => {
     delete obj[old_key]; // delete old key
   }
 };
+
+// format hh:mm 24 hour
+exports.formatTimeVi = (time) => {
+  return new Intl.DateTimeFormat("en", {
+    timeStyle: "short",
+    hour12: false,
+  }).format(new Date(time));
+};
+
+//format dd/mm/yyyy
+exports.formatDateVi = (date) => {
+  return new Intl.DateTimeFormat("vi").format(new Date(date));
+};

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
+const fileSystem = require("fs");
+const fastcsv = require("fast-csv");
 
 const { authCheck, adminCheck } = require("../middlewares/auth");
 const User = require("../models/user");
@@ -14,6 +16,8 @@ const {
   getEnddingOfTheWeek,
   getBeginningOfTheMonth,
   getEnddingOfTheMonth,
+  formatTimeVi,
+  formatDateVi,
 } = require("../utils");
 
 // @route    POST api/user/check-in-out
@@ -643,4 +647,86 @@ router.delete(
     }
   }
 );
+
+// @route    GET api/admin/user/check-in-out/month/${userId}
+// @desc     admin can see total worked time in month on current user
+// @access   Public (test) / User Only
+router.get("/admin/user/check-in-out/month/:id", async (req, res) => {
+  const beginMonth = getBeginningOfTheMonth(new Date());
+  const endMonth = getEnddingOfTheMonth(new Date());
+
+  const { id } = req.params;
+  console.log("id", id);
+  try {
+    // console.log(req.user.id);
+    const activity = await Activity.find({
+      userId: { $in: id },
+      checkInTime: {
+        $gt: beginMonth,
+        $lt: endMonth,
+      },
+    });
+    res.json(activity);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
+// @route    POST api/admin/exportData/${userId}
+// @desc     admin can see total worked time in month on current user
+// @access   Public (test) / User Only
+router.get("/admin/exportData/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const data = [
+    {
+      id: 1,
+      name: "Adnan",
+      age: 29,
+    },
+    {
+      id: 2,
+      name: "Ali",
+      age: 31,
+    },
+    {
+      id: 3,
+      name: "Ahmad",
+      age: 33,
+    },
+  ];
+  console.log("data", data);
+
+  const activity = await Activity.find({ userId })
+    .select({ checkInTime: 1, checkOutTime: 1, date: 1 })
+    .lean()
+    .populate("userId", ["name"])
+    .exec();
+  let activityFilter = [];
+  activityFilter = activity
+    .filter((el) => el.checkInTime !== null)
+    .map((a) => {
+      return {
+        name: a.userId.name,
+        checkIn: formatTimeVi(a.checkInTime),
+        checkOut: formatTimeVi(a.checkOutTime),
+        date: formatDateVi(a.checkInTime),
+      };
+    });
+
+  console.log("export data", activity);
+  console.log("activityFilter", activityFilter);
+
+  const ws = fileSystem.createWriteStream("public/data.csv");
+  fastcsv
+    .write(activityFilter, { headers: true })
+    .on("finish", function () {
+      res.send(
+        "<a href='/public/data.csv' download='data.csv' id='download-link'></a><script>document.getElementById('download-link').click();</script>"
+      );
+      // res.send(data);
+    })
+    .pipe(ws);
+});
+
 module.exports = router;

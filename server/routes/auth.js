@@ -104,7 +104,7 @@ router.get("/user/:id", readOne);
 router.put("/user/:id", authCheck, adminCheck, update);
 // router.put("/user/:id", update);
 
-// @route    PUT api/user/:id
+// @route    GET api/user/:id
 // @desc     Update 1 user based on params userId
 // @access   Admin
 // @usage    Yes
