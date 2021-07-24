@@ -88,12 +88,12 @@ const Report = () => {
     {
       field: "checkIn",
       headerName: "Check In",
-      width: 130,
+      width: 150,
     },
     {
       field: "checkOut",
       headerName: "Check Out",
-      width: 130,
+      width: 150,
     },
     {
       field: "message",
