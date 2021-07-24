@@ -19,20 +19,24 @@ const rfidOpenDoorSchema = new mongoose.Schema(
       default: 1,
     },
     createTime: {
-      type: String,
-      default: Date.now,
+      type: Date,
+      default: Date.now(),
     },
     createTimeLocalTime: {
       type: String,
       default: "not-set",
     },
     checkOutTimeOpenDoor: {
-      type: String,
-      default: "not-set",
+      type: Date,
+      default: Date.now(),
     },
     expireTime: {
       type: Number,
       default: 60000,
+    },
+    status: {
+      type: String,
+      default: "decline",
     },
   },
   { timestamps: true }

@@ -111,4 +111,27 @@ router.put("/user/:id", authCheck, adminCheck, update);
 router.get("/user/new-employees/week", newEmployees);
 // router.put("/user/:id", update);
 
+/**
+ * LOGIC phan bao loi van tay : POST /api/admin/report/fingerprint-error
+ * user se gui tu man hinh lenh van tay loi : {message: fingerprint, rfid: rfidCode}
+ * server check if (message = fingerprint)
+ *  -> tim userId
+ *  -> update status: fingerprintError
+ *
+ * Render table trong Report page:
+ *   Check neu status == fingerprintError -> render ra
+ *    hien thi 2 btn approve & decline
+ *    neu approve update status : approved
+ *    neu decline update status : decline
+ *
+ * De mo cua:
+ *  check neu status : $ne : decline
+ */
+
+// @route    GET api/admin/report/fingerprint-error
+// @desc     Get all user with state = fingerprintErr
+// @access   Admin
+// @usage    Yes
+// router.get("/admin/report/fingerprint-error", fingerprintErrData);
+
 module.exports = router;

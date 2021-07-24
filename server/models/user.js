@@ -48,17 +48,17 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 1000000,
     },
-    coeffSalary: {
-      type: Number,
-      default: 0,
-    },
-    testTime: {
-      type: Date,
-    },
+    // coeffSalary: {
+    //   type: Number,
+    //   default: 0,
+    // },
     address: String,
     position: {
       type: String,
       default: "Software Engineer",
+    },
+    status: {
+      type: String,
     },
     //   wishlist: [{ type: ObjectId, ref: "Product" }],
   },

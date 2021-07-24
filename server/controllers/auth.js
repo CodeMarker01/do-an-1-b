@@ -13,6 +13,11 @@ const {
   getEndingOfTheDay,
   isValidDate,
 } = require("../utils");
+const {
+  REPORT_APPROVED,
+  REPORT_DECLINE,
+  REPORT_PENDING,
+} = require("../constants");
 
 // exports.CreateUser = async (req, res) => {
 //   console.log("REQ USER", req.user);
@@ -270,6 +275,8 @@ exports.readOne = async (req, res) => {
       $gte: beginDate,
       $lte: endDate,
     },
+    //todo 1.test status v2
+    status: { $nin: [REPORT_PENDING, REPORT_DECLINE] },
   })
     .populate("userId", ["name", "email", "avatar", "position", "salary"])
     .exec();
@@ -384,3 +391,11 @@ exports.newEmployees = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+// exports.fingerprintErrData = async (req, res) => {
+//   try {
+//     const users = await User.find({})
+//   } catch (err) {
+//     res.status(500).send("Server Error");
+//   }
+// };

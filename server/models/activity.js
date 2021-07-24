@@ -38,6 +38,17 @@ const activitySchema = new mongoose.Schema(
       // default: new Date().getMinutes(),
       default: Date.now(),
     },
+    status: {
+      type: String,
+      default: "normal",
+    },
+    mode: {
+      type: String,
+      default: "fingerprint",
+    },
+    message: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
