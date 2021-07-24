@@ -64,21 +64,17 @@ export default function User() {
   //todo end test callba
 
   useEffect(() => {
-    //     console.log("run useEffect in User.js");
-    //     setLoading(true);
-    //     getCurrentUser(userId, date).then((res) => {
-    //       console.log("res.data", res.data);
-    //       setCurrentUser(res.data);
-    //       //       if (currentUser && currentUser.userId) {
-    //       if (res.data) {
-    //         setLoading(false);
-    //         console.log(res.data);
-    //       }
-    //       //       setLoading(false);
-    //       console.log("set loading in useEffect become false");
-    //       //       }
-    //     });
-    loadActivity();
+    //
+    setTimeout(() => {
+      getCurrentUser(userId, date).then((res) => {
+        console.log("res.data", res.data);
+        setCurrentUser(res.data);
+        setAdminDateChange(new Date(res.data.date).toLocaleDateString("sv-SE"));
+        setLoading(false);
+      });
+    }, 300);
+    //
+    // loadActivity();
   }, [date, userId, loadActivity, adminDateChange]);
 
   //get worked this month data
@@ -426,6 +422,7 @@ export default function User() {
               <LocationSearching className="userShowIcon" />
               <span className="userShowInfoTitle">SPKT | TPHCM</span>
             </div>
+            <span className="userShowTitle">Worked Time</span>
             <div className="userShowInfo">
               <LocationSearching className="userShowIcon" />
               <span className="userShowInfoTitle">

@@ -6,6 +6,8 @@ import { userData } from "../../dummyData";
 import WidgetLg from "../../components/widgetLg/WidgetLg";
 import { loadActivityAdminWeek } from "../../actions/activity";
 import { loadNewUserWeek } from "../../actions/auth";
+import { useDispatch } from "react-redux";
+import { loadReportUserData } from "../../actions/rfidOpenDoor";
 
 const Home = () => {
   //state
@@ -21,6 +23,10 @@ const Home = () => {
       setNewEmployees(res.data);
     });
   }, []);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(loadReportUserData());
+  }, [dispatch]);
   console.log(
     "🚀 ~ file: Home.js ~ line 14 ~ Home ~ newEmployees",
     newEmployees

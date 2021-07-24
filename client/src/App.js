@@ -25,6 +25,8 @@ import { LoadActivityUserData, loadActivityUserWeek } from "./actions/activity";
 //toast
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UserTimeTable from "./pages/userTimeTable/UserTimeTable";
+import Report from "./pages/report/Report";
 
 const App = () => {
   const { res } = LoadActivityUserData();
@@ -78,6 +80,11 @@ const App = () => {
                   <Sidebar />
                   <Home />
                 </AdminRoute>
+                <AdminRoute exact path="/report">
+                  <Sidebar />
+                  <Report />
+                </AdminRoute>
+
                 <UserRoute path="/user/:userQuery">
                   <Sidebar />
                   <User />
@@ -95,6 +102,10 @@ const App = () => {
                 <UserRoute exact path="/dashboardUser">
                   <Sidebar />
                   <UserHome />
+                </UserRoute>
+                <UserRoute exact path="/time-table">
+                  <Sidebar />
+                  <UserTimeTable />
                 </UserRoute>
               </Switch>
             </div>

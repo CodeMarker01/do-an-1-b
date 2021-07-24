@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 export default function Sidebar() {
   //redux auth
   const { user } = useSelector((state) => state.auth);
+  const { reportList } = useSelector((state) => state.rfidOpenDoor);
   const location = useLocation();
   const { pathname } = location;
   const splitLocation = pathname.split("/");
@@ -34,6 +35,10 @@ export default function Sidebar() {
   } else {
     directToPage = "/";
   }
+  console.log(
+    "🚀 ~ file: Sidebar.js ~ line 32 ~ Sidebar ~ reportList",
+    reportList
+  );
   return (
     <div className="sidebar">
       <div className="sidebarWrapper">
@@ -43,13 +48,29 @@ export default function Sidebar() {
             <Link to={directToPage} className="link">
               <li
                 className={`sidebarListItem ${
-                  splitLocation[1] === "dashboard" ? "active" : ""
+                  splitLocation[1] === "dashboard" ||
+                  splitLocation[1] === "dashboardUser"
+                    ? "active"
+                    : ""
                 }`}
               >
                 <LineStyle className="sidebarIcon" />
                 Home
               </li>
             </Link>
+
+            {user.role === "subscriber" && (
+              <Link to="/time-table" className="link">
+                <li
+                  className={`sidebarListItem ${
+                    splitLocation[1] === "time-table" ? "active" : ""
+                  }`}
+                >
+                  <PermIdentity className="sidebarIcon" />
+                  Time Table
+                </li>
+              </Link>
+            )}
 
             {user.role === "admin" && (
               <Link to="/users" className="link">
@@ -60,6 +81,21 @@ export default function Sidebar() {
                 >
                   <PermIdentity className="sidebarIcon" />
                   Users
+                </li>
+              </Link>
+            )}
+            {user.role === "admin" && (
+              <Link to="/report" className="link">
+                <li
+                  className={`sidebarListItem reportContainer ${
+                    splitLocation[1] === "report" ? "active" : ""
+                  }`}
+                >
+                  <Report className="sidebarIcon" />
+                  Report
+                  {reportList && reportList.length > 0 && (
+                    <span className="reportBadge">{reportList.length}</span>
+                  )}
                 </li>
               </Link>
             )}

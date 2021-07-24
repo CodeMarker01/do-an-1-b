@@ -24,7 +24,7 @@ const AdminRoute = ({ children, ...rest }) => {
           setIsAdmin(false);
         });
     }
-  }, []);
+  }, [isAuthenticated]);
 
   return isAdmin ? (
     <Route {...rest} render={() => children} />

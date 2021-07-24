@@ -85,8 +85,8 @@ export default function Topbar() {
                 >
                   Hi <span>{user?.name}</span>
                 </button>
-                <div class="dropdown-content">
-                  <Link to="/user/account">Account Setting</Link>
+                <div className="dropdown-content">
+                  {/* <Link to="/user/account">Account Setting</Link> */}
                   <a href="#" onClick={btnLogOut}>
                     Log Out
                   </a>

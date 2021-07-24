@@ -1,0 +1,18 @@
+.report {
+  flex: 4;
+  text-align: center;
+}
+
+.userListUser {
+  display: flex;
+  align-items: center;
+}
+
+.userListDelete {
+  color: red;
+  cursor: pointer;
+}
+.userListApprove {
+  color: blue;
+  cursor: pointer;
+}

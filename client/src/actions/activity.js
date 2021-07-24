@@ -41,6 +41,10 @@ export const loadActivityUserWeek = async () =>
 export const loadActivityUserMonth = async () =>
   await api.get("/user/check-in-out/month");
 
+// get 1 user and activity in all time for user route
+export const loadActivityUserAllTime = async () =>
+  await api.get("/user/check-in-out/all-time");
+
 // get 1 user and activity in current month
 export const loadAdminLookForActivityUserMonth = async (userId) =>
   await api.get(`/admin/user/check-in-out/month/${userId}`);

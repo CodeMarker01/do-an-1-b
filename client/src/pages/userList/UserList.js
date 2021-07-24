@@ -171,7 +171,9 @@ export default function UserList() {
       renderCell: (params) => {
         return (
           <div className="userListUser">
-            {params.row.workingTime ? `${params.row.workingTime} hour` : "--"}
+            {params.row.workingTime
+              ? `${params.row.workingTime} hour(s)`
+              : "--"}
           </div>
         );
       },

@@ -1,0 +1,9 @@
+.userTimeTable {
+  flex: 4;
+  text-align: center;
+}
+
+.userListUser {
+  display: flex;
+  align-items: center;
+}
