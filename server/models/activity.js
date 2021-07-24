@@ -29,10 +29,10 @@ const activitySchema = new mongoose.Schema(
       default: null,
     },
     workingTime: String,
-    salary: {
-      type: Number,
-      default: 1000000,
-    },
+    // salary: {
+    //   type: Number,
+    //   default: 1000000,
+    // },
     date: {
       type: Date,
       // default: new Date().getMinutes(),
