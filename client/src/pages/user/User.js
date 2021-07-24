@@ -499,7 +499,12 @@ export default function User() {
                     onChange={handleDateChange}
                   />
                   <div className="buttonDateDelete">
-                    <button onClick={handleDeleteDate}>Delete</button>
+                    <button
+                      className="btnDateDelete"
+                      onClick={handleDeleteDate}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

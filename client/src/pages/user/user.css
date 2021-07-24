@@ -178,3 +178,13 @@
   width: 144px;
   text-align: center;
 }
+
+/* btn update */
+.btnDateDelete {
+  background: lightcoral;
+  color: white;
+  border: coral;
+  border-radius: 10%;
+  padding: 0.1rem 1rem;
+  margin-left: 10px;
+}
