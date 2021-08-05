@@ -28,7 +28,7 @@ const addDb = async () => {
   for (let i = 0; i <= 23; i++) {
     const dumpWork = {
       // userId: "60cf4873b401ed7068dd5b88",
-      userId: "60fb5a523179c12b8426647b",
+      userId: "60fc25cabb0b8b146cba96df",
       checkInTime: randomCheckIn(
         getBeginningOfTheWeek(new Date("2021-07-01")),
         i
@@ -37,7 +37,7 @@ const addDb = async () => {
         getBeginningOfTheWeek(new Date("2021-07-01")),
         i
       ),
-      username: "trinhmai",
+      username: "Duc Nguyen",
       status: "approved",
       mode: "fingerprint",
     };
